@@ -1,5 +1,20 @@
 Linux under the Hood
 
+
+### Linux file descriptios 
+
+- Linux is a file oriented OS
+- Everything is happening as a file
+  - Device access
+  - IO handling
+  - Interprocess communication
+- every process keeps a table of the file descritptors that are in use in 
+`/rpoc/<pid>/fd
+- Common file descriptors:
+  - `0`: STDIN
+  - `1`: STDOUT
+  - `2`: STDER
+
 1.1 understanding the stack:
 
  User
@@ -113,3 +128,9 @@ a slow, but uniform method to access disks.
 
 To avoid a command to be replaced with the system alias escape the command with
 `\` for example `\ls` 
+
+
+- - -
+
+For design reasons the block evices, the minor number is multiple of 16, the a 
+max of 15 partitions are allowed in a disk TODO: Why?
