@@ -12,3 +12,6 @@ For fedora 24 `/usr/src/kernels/4.11.12-100.fc24.x86_64+debug/include/uapi/asm-g
 
 Usually one returns `-ERROR`, while the return from the system is almos always `-1`
 with the actual code error being stored in the thread local variable `errno` in user space.
+
+
+https://kukuruku.co/post/writing-a-file-system-in-linux-kernel/
