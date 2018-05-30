@@ -1,20 +1,19 @@
 #include <stdio.h>
-#include <stdlib.h>
-#include <unistd.h>
+#include <stdlib.h> // include atoi
+#include <unistd.h> // includes getpid, pause, close
 #include <fcntl.h>
-#include <time.h>
-#include <sys/types.h>
-#include <sys/wait.h>
+#include <time.h> // clock_gettime, CLOCK_REALTIME
 #include <signal.h>
-#include <sys/time.h>
-#include <stdint.h>
+#include <stdint.h> // for uint64_t kind of types
 #include <sys/ioctl.h>
 #include <linux/hpet.h>
 
 
 static uint64_t hpet_sigio_count;
 static uint64_t secs;
-
+/**
+ * Function to be executed on the timer interruption
+ * */
 static void hpet_alarm(int val)
 {
   struct timespec t;
