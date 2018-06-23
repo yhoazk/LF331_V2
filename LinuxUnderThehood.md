@@ -132,5 +132,81 @@ To avoid a command to be replaced with the system alias escape the command with
 
 - - -
 
+- The linux kernel is not compiled with all possible disk drivers inside; then
+it needs the `initramfs`. Also the initramfs contains proprietary drivers and
+configurations as a loadable modules.
+
+This means that during boot there are 2 file systems, the ram and the init the "real"
+Using the initramfs is optional, only needed if not the modules are in the kernel.
+
+
+#### initrd
+
+The initrd is initial ram disk. Its located in `/boot` and is in the format of a `cpio`
+file, we can see the contents of the `initrd`.
+
+```
+$ file /boot/initrd-4.*
+/boot/initrd* : ASCII cpio archive SVR4 with no CRC
+$ cat /boot/initrd* | cpio -i --no-absolute-filenames
+888 blocks
+```
+If the file is compressed then we need to replace the `cat` command for the `zcat` command. 
+
+
+#### The infamous `dracut`
+
+This program generates a `initramfs` which is a file system that is created automatically
+when installed. But it also can be created with the `dracut` programm. 
+This command creates the file system with a given configuration.
+
+The configuration is located in `/etc/dracut.conf`. See `man dracut.conf(5)`
+in this file we can add drivers, file systems and other options. 
+
+---
+
+In the grub menu press `e` to edit the configuration.
+Lets boot in the phase where the `initramfs` to be loaded, but systemd not has loaded it yet.
+In the kernel load line add the instruction `rd.break`
+
+```
+linux16 /vmlinuz-4.* root=/dev/mapper... rd.lvm.lv=centos/swap rd.break
+```
+This means that it will stop when loads the `intramfs`, this can be used to enter in a machine
+w/o password.
+
+
+
+##### `init` vs `exec init`
+
+This commands are to be run in the kernel mode.
+The first command `init` will fail because the `init` is being forked in the shell
+and it won 't have the PID==1. But the `exec init` replaces the current process which
+is a shell with the `init` itself, then it works.
+
+
+`init` is not the initial process anymore. Now it can be also upstart or systemd.
+Anyhow the init proces should be located int `/sbin/init` and is the responsible for 
+starting the user space environment.
+
+The `/sbin/init` could be a link. Then if you want to check if your machine is using
+init, upstart or systemd check where is pointing the `/sbin/init` file.
+
+eg:
+```
+ls -alth /sbin/ini*
+lrwxrwxrwx. 1 root root 22 Jun 28  2017 /sbin/init -> ../lib/systemd/systemd
+```
+
+
+
 For design reasons the block evices, the minor number is multiple of 16, the a 
 max of 15 partitions are allowed in a disk TODO: Why?
+
+This also depends on the file system that the HD is getting.
+In MBR (master boot record) we can only have four primary partitions.
+One of them could be extened partition which can contain an arbitrary 
+number of logical partitions.
+
+GPT the new partition model supports up to 128 primary partitions
+
