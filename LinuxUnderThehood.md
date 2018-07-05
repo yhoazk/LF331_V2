@@ -197,8 +197,88 @@ eg:
 ls -alth /sbin/ini*
 lrwxrwxrwx. 1 root root 22 Jun 28  2017 /sbin/init -> ../lib/systemd/systemd
 ```
+Also if your system has an `/etc/inittab`, it is using `system V`
+
+System V uses runlevels to define the state a serer should boot in.
+In every runlevel a specific amount of shell scripts is processed to reach the
+state that the system should be in.
+
+There is little standarization in the system V init shell scripts.
+
+### Understand upstart
+
+- Upstart was created by ubuntu and was the first serious attempt to replace system v
+- upstart is reactionary, it receives events and runs jobs based on these events
+- This makes upstart more flexible
+- But still, upstart is using shell scripts and uses many featrues that existed in
+init already.
+- if your system has an `/etc/init` directory, it is using upstart.
+
+### Systemd
+- The goal of the systemd project is to "provide an operating system that runs on top of
+the linux kernel"
+- It takes care of everything, which on occasions scares experienced linux admins.
+- systemd can replace
+  - mount etc/fstab
+  - cron
+  - xinitd
+  - spawn containers, so fuck off docker
+- Systemd is goal oriented: the administrator defines a target that needs to be reached
+and next defines all the needs to be loaded to reach that state un unit files
+- Unit files specify loading of services and more, as well as all dependencies that need
+to be met and load them.
+- To know if the system running is using systemd look for the `/usr/lib/systemd`.
 
 
+- systend unit files define what needs to be started.
+- Diferent types of unit files exist:
+  - service: to start a service
+  - Mount: to mount a file system
+  - timer: to run a process, could replace cron
+  - autmount: Automatically 
+  - target: group of unit files
+  - path
+  - And more
+
+- systemd works with different types of dependencies:
+  - requires: defines units that must be loaded to loat this unit.
+  - wants: typically seen in targets, define which should be loaded but
+  loading continues if this fails.
+  - requisite: the defined unit must already be active. If its not, systemd fails loading the unit
+  - conflict: unit that may never be active when this unit is loaded.
+  - before: the current unit will activate before the listed units
+  - after: the current unit will activate after the listed unit.
+
+
+```
+cd /usr/lib/systemd/system
+cat vsftpd.target
+
+##### Logging
+
+Applications need to log information, they can log in:
+- stderr
+- own log
+- rsyslog
+  - centralized
+- systemd::journald
+  - non-centralized
+  - controled with journalctl
+
+
+`dnf install bash-completion`
+
+To get the log `journalctl` and tab for filters.
+
+
+#### Starting the userspace environment
+When init loads the userspace environment, the following order is roughly applied.
+- Starting of essential low-level services such as `udevd`, `syslog` file system mounts.
+- Loading of network configuration
+- Loading of high-level services, such as cron, printing or web server
+- Presenting a login prompt
+The order in which this happens is essential; serial loading is required for 
+dependencies, sometimes parallel loading can be used to increase speed.
 
 For design reasons the block evices, the minor number is multiple of 16, the a 
 max of 15 partitions are allowed in a disk TODO: Why?
