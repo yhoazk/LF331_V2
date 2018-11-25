@@ -7,16 +7,12 @@ current working directory.
 
 This still does not answers the question.
 
-
-
 ## SLAB Allocation
 
 Slab allocation is a memory management mechanism intended for the efficient
 memory allocation of kernel objects. 
 
-
 ## cache coloring
-
 
 Starting a bash console without any information on the partent process.
 
@@ -26,5 +22,3 @@ Starting a bash console without any information on the partent process.
 - `bash --norc --noprofile`: Starts a bash without reading the rc file.
 
 The `env -i` is needed as the bash command and its flags still inherit from the starting process.
-
-

@@ -51,3 +51,11 @@ and the burst time in `/proc/sys/kernel/printk_ratelimit_burst`
 
 **NOTE:** Since kernel version 2.6.33 `printk_ratelimit()` is deprecated in favor
 of `printk_ratelimited(fmt, ...)`
+
+
+
+- is `printk` buffered?
+- Where is the buffer located in RAM? 
+- If we deactivate memory layout randomization is possible to get the contents of the RAM log?
+- There's any mechanism to store the buffer of `printk` in case of a kernel error?
+- 
