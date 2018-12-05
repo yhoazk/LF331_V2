@@ -96,3 +96,19 @@ set history save
 ```
 
 In newer versions, only the init file in the user `$HOME` is parsed, not project local.
+
+### Breakpoints, watchpoints, catchpoints and tracepoints
+
+
+Save the inspection points:
+```
+(gdb) save breakpoints <filename>
+```
+
+Restore them:
+```
+(gdb) source <filename>
+```
+
+
+[src](https://sourceware.org/gdb/current/onlinedocs/gdb/)
