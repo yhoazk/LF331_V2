@@ -1,0 +1,108 @@
+execve("./ld_cpp.exe", ["./ld_cpp.exe"], [/* 44 vars */]) = 0
+brk(NULL)                               = 0x1e88000
+uname({sysname="Linux", nodename="raspberrypi", ...}) = 0
+access("/etc/ld.so.nohwcap", F_OK)      = -1 ENOENT (No such file or directory)
+access("/etc/ld.so.preload", R_OK)      = 0
+open("/etc/ld.so.preload", O_RDONLY|O_CLOEXEC) = 3
+fstat64(3, {st_mode=S_IFREG|0644, st_size=42, ...}) = 0
+mmap2(NULL, 42, PROT_READ|PROT_WRITE, MAP_PRIVATE, 3, 0) = 0xb6f0c000
+close(3)                                = 0
+open("/usr/lib/arm-linux-gnueabihf/libarmmem.so", O_RDONLY|O_CLOEXEC) = 3
+read(3, "\177ELF\1\1\1\0\0\0\0\0\0\0\0\0\3\0(\0\1\0\0\0\210\5\0\0004\0\0\0"..., 512) = 512
+lseek(3, 20868, SEEK_SET)               = 20868
+read(3, "\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0"..., 1000) = 1000
+lseek(3, 20540, SEEK_SET)               = 20540
+read(3, "A,\0\0\0aeabi\0\1\"\0\0\0\0056\0\6\6\10\1\t\1\n\3\f\1\22\4\24"..., 45) = 45
+fstat64(3, {st_mode=S_IFREG|0644, st_size=21868, ...}) = 0
+mmap2(NULL, 8192, PROT_READ|PROT_WRITE, MAP_PRIVATE|MAP_ANONYMOUS, -1, 0) = 0xb6f0a000
+mmap2(NULL, 86080, PROT_READ|PROT_EXEC, MAP_PRIVATE|MAP_DENYWRITE, 3, 0) = 0xb6ec7000
+mprotect(0xb6ecc000, 61440, PROT_NONE)  = 0
+mmap2(0xb6edb000, 8192, PROT_READ|PROT_WRITE, MAP_PRIVATE|MAP_FIXED|MAP_DENYWRITE, 3, 0x4000) = 0xb6edb000
+close(3)                                = 0
+munmap(0xb6f0c000, 42)                  = 0
+open("/etc/ld.so.cache", O_RDONLY|O_CLOEXEC) = 3
+fstat64(3, {st_mode=S_IFREG|0644, st_size=85755, ...}) = 0
+mmap2(NULL, 85755, PROT_READ, MAP_PRIVATE, 3, 0) = 0xb6eb2000
+close(3)                                = 0
+access("/etc/ld.so.nohwcap", F_OK)      = -1 ENOENT (No such file or directory)
+open("/usr/lib/arm-linux-gnueabihf/libstdc++.so.6", O_RDONLY|O_CLOEXEC) = 3
+read(3, "\177ELF\1\1\1\3\0\0\0\0\0\0\0\0\3\0(\0\1\0\0\0000\332\6\0004\0\0\0"..., 512) = 512
+lseek(3, 1268340, SEEK_SET)             = 1268340
+read(3, "\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0"..., 1280) = 1280
+lseek(3, 1267740, SEEK_SET)             = 1267740
+read(3, "A.\0\0\0aeabi\0\1$\0\0\0\0056\0\6\6\10\1\t\1\n\2\22\4\23\1\24"..., 47) = 47
+fstat64(3, {st_mode=S_IFREG|0644, st_size=1269620, ...}) = 0
+mmap2(NULL, 1341504, PROT_READ|PROT_EXEC, MAP_PRIVATE|MAP_DENYWRITE, 3, 0) = 0xb6d6a000
+mprotect(0xb6e99000, 65536, PROT_NONE)  = 0
+mmap2(0xb6ea9000, 28672, PROT_READ|PROT_WRITE, MAP_PRIVATE|MAP_FIXED|MAP_DENYWRITE, 3, 0x12f000) = 0xb6ea9000
+mmap2(0xb6eb0000, 6208, PROT_READ|PROT_WRITE, MAP_PRIVATE|MAP_FIXED|MAP_ANONYMOUS, -1, 0) = 0xb6eb0000
+close(3)                                = 0
+access("/etc/ld.so.nohwcap", F_OK)      = -1 ENOENT (No such file or directory)
+open("/lib/arm-linux-gnueabihf/libm.so.6", O_RDONLY|O_CLOEXEC) = 3
+read(3, "\177ELF\1\1\1\0\0\0\0\0\0\0\0\0\3\0(\0\1\0\0\0`=\0\0004\0\0\0"..., 512) = 512
+lseek(3, 451032, SEEK_SET)              = 451032
+read(3, "\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0"..., 1120) = 1120
+lseek(3, 450676, SEEK_SET)              = 450676
+read(3, "A0\0\0\0aeabi\0\1&\0\0\0\0056\0\6\6\10\1\t\1\n\2\22\4\23\1\24"..., 49) = 49
+fstat64(3, {st_mode=S_IFREG|0644, st_size=452152, ...}) = 0
+mmap2(NULL, 516220, PROT_READ|PROT_EXEC, MAP_PRIVATE|MAP_DENYWRITE, 3, 0) = 0xb6ceb000
+mprotect(0xb6d58000, 65536, PROT_NONE)  = 0
+mmap2(0xb6d68000, 8192, PROT_READ|PROT_WRITE, MAP_PRIVATE|MAP_FIXED|MAP_DENYWRITE, 3, 0x6d000) = 0xb6d68000
+close(3)                                = 0
+access("/etc/ld.so.nohwcap", F_OK)      = -1 ENOENT (No such file or directory)
+open("/lib/arm-linux-gnueabihf/libgcc_s.so.1", O_RDONLY|O_CLOEXEC) = 3
+read(3, "\177ELF\1\1\1\0\0\0\0\0\0\0\0\0\3\0(\0\1\0\0\0\200\321\0\0004\0\0\0"..., 512) = 512
+lseek(3, 115292, SEEK_SET)              = 115292
+read(3, "\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0"..., 1080) = 1080
+lseek(3, 114944, SEEK_SET)              = 114944
+read(3, "A,\0\0\0aeabi\0\1\"\0\0\0\0056\0\6\6\10\1\t\1\n\2\22\4\24\1\25"..., 45) = 45
+fstat64(3, {st_mode=S_IFREG|0644, st_size=116372, ...}) = 0
+mmap2(NULL, 180536, PROT_READ|PROT_EXEC, MAP_PRIVATE|MAP_DENYWRITE, 3, 0) = 0xb6cbe000
+mprotect(0xb6cda000, 61440, PROT_NONE)  = 0
+mmap2(0xb6ce9000, 8192, PROT_READ|PROT_WRITE, MAP_PRIVATE|MAP_FIXED|MAP_DENYWRITE, 3, 0x1b000) = 0xb6ce9000
+close(3)                                = 0
+access("/etc/ld.so.nohwcap", F_OK)      = -1 ENOENT (No such file or directory)
+open("/lib/arm-linux-gnueabihf/libc.so.6", O_RDONLY|O_CLOEXEC) = 3
+read(3, "\177ELF\1\1\1\0\0\0\0\0\0\0\0\0\3\0(\0\1\0\0\0@h\1\0004\0\0\0"..., 512) = 512
+lseek(3, 1231820, SEEK_SET)             = 1231820
+read(3, "\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0"..., 2880) = 2880
+lseek(3, 1228284, SEEK_SET)             = 1228284
+read(3, "A.\0\0\0aeabi\0\1$\0\0\0\0056\0\6\6\10\1\t\1\n\2\22\4\23\1\24"..., 47) = 47
+fstat64(3, {st_mode=S_IFREG|0755, st_size=1234700, ...}) = 0
+mmap2(NULL, 1303872, PROT_READ|PROT_EXEC, MAP_PRIVATE|MAP_DENYWRITE, 3, 0) = 0xb6b7f000
+mprotect(0xb6ca9000, 61440, PROT_NONE)  = 0
+mmap2(0xb6cb8000, 12288, PROT_READ|PROT_WRITE, MAP_PRIVATE|MAP_FIXED|MAP_DENYWRITE, 3, 0x129000) = 0xb6cb8000
+mmap2(0xb6cbb000, 9536, PROT_READ|PROT_WRITE, MAP_PRIVATE|MAP_FIXED|MAP_ANONYMOUS, -1, 0) = 0xb6cbb000
+close(3)                                = 0
+mmap2(NULL, 8192, PROT_READ|PROT_WRITE, MAP_PRIVATE|MAP_ANONYMOUS, -1, 0) = 0xb6f08000
+set_tls(0xb6f084c0, 0xb6f08bb8, 0xb6f0e050, 0xb6f084c0, 0xb6f0e050) = 0
+mprotect(0xb6cb8000, 8192, PROT_READ)   = 0
+mprotect(0xb6ce9000, 4096, PROT_READ)   = 0
+mprotect(0xb6d68000, 4096, PROT_READ)   = 0
+mprotect(0xb6ea9000, 20480, PROT_READ)  = 0
+mprotect(0xb6ec7000, 20480, PROT_READ|PROT_WRITE) = 0
+mprotect(0xb6ec7000, 20480, PROT_READ|PROT_EXEC) = 0
+cacheflush(0xb6ec7000, 0xb6ecc000, 0, 0x15, 0) = 0
+mprotect(0xb6edb000, 4096, PROT_READ)   = 0
+mprotect(0x20000, 4096, PROT_READ)      = 0
+mprotect(0xb6f0d000, 4096, PROT_READ)   = 0
+munmap(0xb6eb2000, 85755)               = 0
+brk(NULL)                               = 0x1e88000
+brk(0x1ead000)                          = 0x1ead000
+socket(AF_UNIX, SOCK_DGRAM|SOCK_CLOEXEC, 0) = 3
+connect(3, {sa_family=AF_UNIX, sun_path="/dev/log"}, 110) = 0
+getuid32()                              = 1000
+gettimeofday({tv_sec=1559394180, tv_usec=356789}, NULL) = 0
+open("/etc/localtime", O_RDONLY|O_CLOEXEC) = 4
+fstat64(4, {st_mode=S_IFREG|0644, st_size=2335, ...}) = 0
+fstat64(4, {st_mode=S_IFREG|0644, st_size=2335, ...}) = 0
+read(4, "TZif2\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\t\0\0\0\t\0\0\0\0"..., 4096) = 2335
+_llseek(4, -28, [2307], SEEK_CUR)       = 0
+read(4, "\nCET-1CEST,M3.5.0,M10.5.0/3\n", 4096) = 28
+close(4)                                = 0
+getpid()                                = 1793
+send(3, "<141>Jun  1 15:03:00 ld_cpp[1793"..., 63, MSG_NOSIGNAL) = 63
+fstat64(1, {st_mode=S_IFCHR|0620, st_rdev=makedev(136, 0), ...}) = 0
+close(3)                                = 0
+write(1, "sfsdf", 5sfsdf)                    = 5
+exit_group(0)          
