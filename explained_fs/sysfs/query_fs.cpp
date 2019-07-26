@@ -56,7 +56,7 @@ bool isEthConfigForInterface(const char* interface) noexcept{
     return operational_state == "up";
 }
 
-// set a inotify for the interfaces
+// set a inotify for the interfacesx
 
 bool isEthIfaceCfgd(std::string iface){
     struct ifreq ifr;
