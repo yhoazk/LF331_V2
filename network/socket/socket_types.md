@@ -73,5 +73,5 @@ For example:
 - `PF_NDD` The operating system NDD
 
 - - -
-
+ // buffered sockets?
 ## Out of Band data
