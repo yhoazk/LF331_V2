@@ -15,14 +15,14 @@
 #include <net/if.h>
 #include <netinet/ether.h>
 
-#define MY_DEST_MAC0  0x00
-#define MY_DEST_MAC1  0x00
-#define MY_DEST_MAC2  0x00
+#define MY_DEST_MAC0  0x01
+#define MY_DEST_MAC1  0x80
+#define MY_DEST_MAC2  0xC2
 #define MY_DEST_MAC3  0x00
 #define MY_DEST_MAC4  0x00
-#define MY_DEST_MAC5  0x00
+#define MY_DEST_MAC5  0x0E
 
-#define DEFAULT_IF  "eth0"
+#define DEFAULT_IF  "enp9s0"
 #define BUF_SIZ    1024
 
 int main(int argc, char *argv[])
@@ -35,6 +35,9 @@ int main(int argc, char *argv[])
   struct ether_header *eh = (struct ether_header *) sendbuf;
   struct iphdr *iph = (struct iphdr *) (sendbuf + sizeof(struct ether_header));
   struct sockaddr_ll socket_address;
+  socket_address.sll_family = AF_PACKET;
+  socket_address.sll_pkttype = PACKET_MULTICAST;
+  socket_address.sll_protocol = htons(0x88f7);
   char ifName[IFNAMSIZ];
 
   /* Get interface name */
