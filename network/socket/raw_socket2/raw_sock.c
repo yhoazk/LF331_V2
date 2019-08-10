@@ -55,7 +55,7 @@ int main()
         daddr_size = sizeof (struct sockaddr);
         //Receive a packet
         // data_size = recvfrom(sock_raw , buffer , 65536 , 0 ,(struct sockaddr *) &saddr , (socklen_t*)&saddr_size);
-
+        data_size = 15;    
         // if(data_size <0 )
         // {
             // printf("Recvfrom error , failed to get packets\n");
@@ -67,13 +67,16 @@ int main()
         //Huge code to process the packet (optional)
 
         //Send the same packet out
-        bytes_sent = write(sock_raw,buffer,data_size);
-        printf("Sent %d bytes\n",bytes_sent);
+        if((bytes_sent = write(sock_raw,buffer,data_size) < 0)){
+            perror("write: ");
+        }
+        
+        printf("Sent %d bytes\n", bytes_sent);
          if (bytes_sent < 0) {
             perror("sendto");
             exit(1);
          }
-
+        sleep(5);
         // }
     }
     close(sock_raw);

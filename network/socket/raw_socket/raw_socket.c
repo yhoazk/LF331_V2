@@ -22,7 +22,7 @@
 #define MY_DEST_MAC4  0x00
 #define MY_DEST_MAC5  0x0E
 
-#define DEFAULT_IF  "enp9s0"
+#define DEFAULT_IF  "enp7s0"
 #define BUF_SIZ    1024
 
 int main(int argc, char *argv[])
@@ -79,7 +79,7 @@ int main(int argc, char *argv[])
   eh->ether_dhost[4] = MY_DEST_MAC4;
   eh->ether_dhost[5] = MY_DEST_MAC5;
   /* Ethertype field */
-  eh->ether_type = htons(ETH_P_IP);
+  eh->ether_type = htons(0x88f7);
   tx_len += sizeof(struct ether_header);
 
   /* Packet data */
