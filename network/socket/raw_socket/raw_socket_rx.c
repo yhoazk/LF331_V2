@@ -24,10 +24,10 @@
 #define DEST_MAC4    0x00
 #define DEST_MAC5    0x00
 
-#define ETHER_TYPE    0x0800
+#define ETHER_TYPE    0x88f7
 
 #define DEFAULT_IF    "eth0"
-#define             1024
+#define BUF_SIZE    1024
 
 int main(int argc, char *argv[])
 {
@@ -38,7 +38,7 @@ int main(int argc, char *argv[])
     struct ifreq ifopts;    /* set promiscuous mode */
     struct ifreq if_ip;    /* get ip addr */
     struct sockaddr_storage their_addr;
-    uint8_t buf[    ];
+    uint8_t buf[BUF_SIZE];
     char ifName[IFNAMSIZ];
     
     /* Get interface name */
@@ -79,7 +79,7 @@ int main(int argc, char *argv[])
     }
 
 repeat:    printf("listener: Waiting to recvfrom...\n");
-    numbytes = recvfrom(sockfd, buf,     , 0, NULL, NULL);
+    numbytes = recvfrom(sockfd, buf, BUF_SIZE, 0, NULL, NULL);
     printf("listener: got packet %lu bytes\n", numbytes);
 
     /* Check the packet is for me */
