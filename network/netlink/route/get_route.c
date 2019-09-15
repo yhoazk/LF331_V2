@@ -1,35 +1,138 @@
 #include <stdio.h>
-#include <stdio.h>
+#include <unistd.h>
 #include <string.h>
 #include <netinet/in.h>
 #include <linux/rtnetlink.h>
 #include <arpa/inet.h>
 
+/*
+https://lwn.net/Articles/208755/
+https://lwn.net/Articles/137299/
+*/
+
+#include "route_helpers.h"
+
+/* manage netlink level operations */
+
+/**
+ * Prints the information for NL messages of type RTM_GETLINK
+ * */
+void rtnl_print_link(struct nlmsghdr *h){
+  struct ifinfomsg *iface;
+  struct rtattr *attribute;
+  int len;
+  char str_buff[30];
+  unsigned char *str;
+  memset(str_buff, 0, sizeof(str_buff));
+  iface = NLMSG_DATA(h);
+  len = h->nlmsg_len - NLMSG_LENGTH(sizeof(*iface));
+
+  /* loop over all attributes for the NEWLINK message */
+  for (attribute = IFLA_RTA(iface); RTA_OK(attribute, len); attribute = RTA_NEXT(attribute, len)){
+      switch(attribute->rta_type){
+    case IFLA_IFNAME:
+      printf("Interface %d : %s\n", iface->ifi_index, (char *) RTA_DATA(attribute));
+      break;
+    case IFLA_TXQLEN:
+      printf("IFLA_TXQLEN %d\n", *((int*) RTA_DATA(attribute)));
+      break;
+    case IFLA_OPERSTATE:
+      printf("IFLA_OPERSTATE %d\n", *((int*) RTA_DATA(attribute)));
+      break;
+    case IFLA_LINKMODE:
+      printf("IFLA_LINKMODE %d\n", *((int*) RTA_DATA(attribute)));
+      break;
+    case IFLA_MTU:
+      printf("IFLA_MTU %d\n", *((int*) RTA_DATA(attribute)));
+      break;
+    case IFLA_MIN_MTU:
+      printf("IFLA_MIN_MTU %d\n", *((int*) RTA_DATA(attribute)));
+      break;
+    case IFLA_MAX_MTU:
+      printf("IFLA_MAX_MTU %d\n", *((int*) RTA_DATA(attribute)));
+      break;
+    case IFLA_GROUP:
+      printf("IFLA_GROUP %d\n", *((int*) RTA_DATA(attribute)));
+      break;
+    case IFLA_PROMISCUITY:
+      printf("IFLA_PROMISCUITY %d\n", *((int*) RTA_DATA(attribute)));
+      break;
+    case IFLA_ADDRESS:
+      str = (unsigned char*) RTA_DATA(attribute);
+      snprintf(str_buff, sizeof(str_buff), "%02x:%02x:%02x:%02x:%02x:%02x", str[0], str[1],  str[2], str[3], str[4], str[5]);
+      printf("IFLA_ADDRESS %s\n", str_buff);
+
+    default:
+      break;
+    }
+    }
+}
+
+// receive the buffer and try to get the neigh information
+void handle_neig(uint8_t* buff){
+    // as input we get the raw buffer from recvmsg
+    // The ndmsg is contained as an attribute (?)
+    struct nlmsghdr* hdr;
+    struct rtattr neig_attr;
+    struct ndmsg* neigh;
+
+    hdr = (struct nlmsghdr*) buff;
+    // the return message from RTM_GETNEIGH contains a ndmsg struct
+    // is it contained as an attr?
+    // http://man7.org/linux/man-pages/man7/rtnetlink.7.html
+    neigh = (struct ndmsg*) NLMSG_DATA(hdr);
+    show_ndmsg(neigh);
+    struct nda_cacheinfo *cinfo;
+    // cinfo = (struct nda_cacheinfo*) 
+}
+
+void create_nlsocket_any(int* fd, int proto){
+    /* SOCK_CLOEXEC:
+        Set the close-on-exec flag on the new file descriptor
+        from open(2) O_CLOEXEC:
+        This is useful for multithread programs to avoid file descriptor leak
+        in case of execve due to race conditions in the open call
+        SOCK_RAW:
+        NETLINK takes sock_raw and sock_dgram as types but it makes no 
+        distiction between any of those
+      */
+    *fd = socket(AF_NETLINK, SOCK_RAW|SOCK_CLOEXEC, proto);
+}
+
+void create_nlsocket_route(int* fd){
+    create_nlsocket_any(fd, NETLINK_ROUTE);
+}
+
 int get_route(){
     struct nlmsghdr *nmsg;
     struct rtmsg *rmsg;
     struct rtattr *rta;
-    uint8_t buf[512];
-    struct sockaddr_nl snl;
-    struct iovec iov;
+    uint8_t buf[1024*8];
+    struct sockaddr_nl snl; // socket type specific to NETLINK, it should be casted to sockaddr
+    // iovec
+    struct iovec iov;       // iovec: 
     struct msghdr msg;
     static int seq;
     int rcv_len;
-
+    int sfd; // socket file descriptor
     int i;
-
-    int sfd = socket(AF_NETLINK, SOCK_RAW|SOCK_CLOEXEC, NETLINK_ROUTE);
+    // Could generic be used for ROUTE and GETLINK?
+    // sfd = socket(AF_NETLINK, SOCK_RAW, NETLINK_ROUTE);
+    create_nlsocket_route(&sfd);
+    // int sfd = socket(AF_NETLINK, SOCK_RAW|SOCK_CLOEXEC, NETLINK_GENERIC);
     memset(&snl, 0, sizeof(snl)); // here the nl_pid is set to zero to indicate that the msg is for the kernel
     snl.nl_family = AF_NETLINK;
     if(bind(sfd, (struct sockaddr*) &snl, sizeof(snl)) < 0){
-        printf("Error bind \n");
+        perror("Error bind");
     }
 
     memset(buf, 0 , sizeof(buf));
     nmsg = (struct nlmsghdr*)buf;
     nmsg->nlmsg_len = NLMSG_LENGTH(sizeof(*nmsg) + RTA_LENGTH(4/*IPV4_LEN*/));
-    nmsg->nlmsg_flags = NLM_F_REQUEST|NLM_F_ROOT|NLM_F_ATOMIC;
-    nmsg->nlmsg_type = RTM_GETNEIGH;
+    nmsg->nlmsg_flags = NLM_F_REQUEST|NLM_F_ROOT|NLM_F_ATOMIC|NLM_F_DUMP;
+    // nmsg->nlmsg_type = RTM_GETNEIGH; // 
+    nmsg->nlmsg_type = RTM_GETLINK;  // get interface settings
+    // nmsg->nlmsg_type = RTM_GETNEIGHTBL; // to get all the table, see linux/neighbour.h not documented
     nmsg->nlmsg_seq = ++seq;
 
     rmsg = (struct rtmsg*) (nmsg+1);
@@ -43,8 +146,8 @@ int get_route(){
 
 
     // copy to rta?
-    i = htonl(0x60060606);
-    memcpy(RTA_DATA(rta), &i, 4);
+    // i = htonl(0x60060606);
+    // memcpy(RTA_DATA(rta), &i, 4);
 
     memset(&snl, 0, sizeof(snl));
     snl.nl_family = AF_NETLINK;
@@ -57,58 +160,101 @@ int get_route(){
     msg.msg_iov = &iov;
     msg.msg_iovlen = 1;
 
-    if(sendmsg(sfd, &msg, 0) < 0){
-        printf("Err\n");
-    }
+    if(sendmsg(sfd, &msg, 0) < 0)  perror("Err\n");
 
     iov.iov_base = buf;
     iov.iov_len = sizeof(buf);
-
-    if((rcv_len = recvmsg(sfd, &msg, 0)) <= 0 ){
-        perror("Error recvmsg\n");
-    }
-
-    if(nmsg->nlmsg_len < (int) sizeof(*nmsg) || nmsg->nlmsg_len > rcv_len || nmsg->nlmsg_seq != seq){
-        perror("Error recvmsg\n");
-    }
-    if(nmsg->nlmsg_len == NLMSG_ERROR){
-        perror("Error nlmsg_len\n");
-    }
-
-    struct nlmsghdr *curr_msg;
-    curr_msg = (struct nlmsghdr*) msg;
-    struct ifinfomsg *iface;
-    while(NLMSG_OK(curr_msg, rcv_len)){
-
-        if(NLMSG_DONE == curr_msg->nlmsg_type){
-
-        } else{
-
+    // Which structure is returned with the recvmsg call?
+    for(;;){
+        if((rcv_len = recvmsg(sfd, &msg, 0)) <= 0 ){
+            perror("Error recvmsg\n");
+        } else if( ((struct sockaddr_nl*)(&msg.msg_name))->nl_pid == 0){
+            // verify that the message was sent by the kernel and not another app
+            printf("Message from Kernel\n");
         }
-        curr_msg = NLMSG_NEXT(msg, rcv_len);
-    }
 
+        if(nmsg->nlmsg_len < (int) sizeof(*nmsg) || nmsg->nlmsg_len > rcv_len || nmsg->nlmsg_seq != seq){
+            perror("Error recvmsg\n");
+        }
+        if(nmsg->nlmsg_len == NLMSG_ERROR){
+            perror("Error nlmsg_len\n");
+        }
+        // IFLA_ADDRESS gives the MAC address/
+        handle_neig(msg.msg_iov->iov_base);
+        struct nlmsghdr *curr_msg;
+        curr_msg = (struct nlmsghdr*) msg.msg_iov->iov_base;
+        struct ifinfomsg *iface;
+        while(NLMSG_OK(curr_msg, rcv_len)){
+            iface = NLMSG_DATA(curr_msg);
+            struct rtattr* attr;
+            rtnl_print_link(curr_msg);
+            int attr_len = curr_msg->nlmsg_len - NLMSG_LENGTH(sizeof(*iface));
+            for(attr = IFLA_RTA(iface); RTA_OK(attr, attr_len); attr = RTA_NEXT(attr, attr_len)){
+                printf("rta_type: %d \t attr_len: %d rta_data: %s\n", attr->rta_type,attr_len, (char*)RTA_DATA(attr));
+            }
+            if(NLMSG_DONE == curr_msg->nlmsg_type){
+
+            } else{
+
+            }
+            curr_msg = NLMSG_NEXT(curr_msg, rcv_len);
+        }
+    }
     //i -= NLMSG_LENGTH(sizeof(*nmsg));
     i = IFA_PAYLOAD(nmsg);
     int alen = 4; //address len
     struct in_addr *inp;
     char ipv4string[INET_ADDRSTRLEN];
+    struct ndmsg neig;
     /*
     Filter NUD_REACHEABLE & NUD_PERMANENT
     */
     while (RTA_OK(rta, i)) {
-        if (rta->rta_type == RTA_GATEWAY) {
+        // How is the RTA_DATA formatted in each case?
+        switch (rta->rta_type)
+        {
+        case RTA_OIF: // output interface index
+            printf("RTA_OIF\t ");
+            break;
+        case RTA_DST: // route destination address
+            printf("RTA_DST\t ");
+            break;
+        case RTA_SRC: // route source address
+            printf("RTA_SRC\t ");
+            break;
+        case RTA_IIF: // Input interface index
+            printf("RTA_IIF\t ");
+            break;
+        case RTA_GATEWAY: // gateway of the route
+            printf("RTA_GATEWAY\t ");
             memcpy(&ipv4string, RTA_DATA(rta), alen);
-            printf("GATEWAYY\n");
-        } 
+            printf("GATEWAYY: %s\n", ipv4string);
+            break;
+        case RTA_CACHEINFO:
+            printf("RTA_CACHEINFO\t ");
+            break;
+        case RTA_PRIORITY:
+            printf("RTA_PRIORITY\t ");
+            break;
+        case RTA_METRICS:
+            printf("RTA_METRICS\t ");
+            break;
+        case RTA_PROTOINFO:
+            printf("RTA_PROTOINFO\t ");
+            break;
+        default:
+            break;
+        }
         // if(rta->rta_type == RTA_GATEWAY){
             inp = (struct in_addr *)RTA_DATA(rta);
             inet_ntop(AF_INET, inp, ipv4string, INET_ADDRSTRLEN);
-            printf("addr: %s",ipv4string);
+            printf("rta_type: %d\n",rta->rta_type);
+            printf("addr: %s\n",ipv4string);
         // }
         printf("next\n");
         rta = RTA_NEXT(rta, i);
     }
+    close(sfd);
     return 0;
 }
 
