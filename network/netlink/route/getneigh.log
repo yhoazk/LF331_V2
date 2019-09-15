@@ -3,7 +3,8 @@ recvmsg(3, {msg_name={sa_family=AF_NETLINK, nl_pid=0, nl_groups=00000000}, msg_n
 AF_INET = PF_INET = 2
 NUD_NOARP = 0x40 = 64
 RTN_MULTICAST = 5
-
+NDA_DST = 1
+NDA_LLADR = 2
 msg_iov=[
     {
         iov_base=[

@@ -4,6 +4,7 @@
 #include <netinet/in.h>
 #include <linux/rtnetlink.h>
 #include <arpa/inet.h>
+#include <net/if.h>
 
 /*
 https://lwn.net/Articles/208755/
@@ -75,7 +76,7 @@ void rtnl_print_link(struct nlmsghdr *h){
 
 
 // receive the buffer and try to get the neigh information
-void handle_neig(uint8_t* buff){
+void handle_neig(uint8_t* buff, int rcvd){
     // as input we get the raw buffer from recvmsg
     // The ndmsg is contained as an attribute (?)
     struct nlmsghdr* hdr;
@@ -87,6 +88,11 @@ void handle_neig(uint8_t* buff){
     // the return message from RTM_GETNEIGH contains a ndmsg struct
     // is it contained as an attr?
     // http://man7.org/linux/man-pages/man7/rtnetlink.7.html
+    // https://www.earth.li/~noodles/blog/2018/09/netlink-arp-presence.html
+    // https://github.com/vishvananda/netlink/blob/master/neigh_linux.go#L278
+
+    // TODO: Iterate over the nlmsghrds received
+    while(NLMSG_OK(hdr, rcvd)){
     neigh = (struct ndmsg*) NLMSG_DATA(hdr);
     int len = hdr->nlmsg_len;
     len -= NLMSG_LENGTH(sizeof(*neigh));
@@ -94,20 +100,34 @@ void handle_neig(uint8_t* buff){
     len = hdr->nlmsg_len - NLMSG_LENGTH(sizeof(*neigh));
     unsigned char* str_mac;
     char mac_buf[30];
+    memset(mac_buf, 0 , sizeof(mac_buf)); 
+    printf("Interface index %d\n", neigh->ndm_ifindex);
+    if_indextoname(neigh->ndm_ifindex, mac_buf);
+    printf("Interface name %s\n", mac_buf);
+    memset(mac_buf, 0 , sizeof(mac_buf)); 
     while(RTA_OK(attr, len)){
         switch (attr->rta_type){
-        case NDA_LLADDR:
-            str_mac = (unsigned char*)RTA_DATA(attr);
-            snprintf(mac_buf, sizeof(mac_buf), " %02x:%02x:%02x:%02x:%02x:%02x",  str_mac[0], str_mac[1], str_mac[2], str_mac[3], str_mac[4], str_mac[5]); 
-            printf("MAAAAC: %s", mac_buf);
-            break;
-        default:
-            break;
+            case NDA_LLADDR:
+                str_mac = (unsigned char*)RTA_DATA(attr);
+                snprintf(mac_buf, sizeof(mac_buf), " %02x:%02x:%02x:%02x:%02x:%02x",  str_mac[0], str_mac[1], str_mac[2], str_mac[3], str_mac[4], str_mac[5]); 
+                printf("MAAAAC: %s\n", mac_buf);
+                memset(mac_buf, 0 , sizeof(mac_buf)); 
+                break;
+            case NDA_DST:
+                str_mac = (unsigned char*)RTA_DATA(attr);
+                snprintf(mac_buf, sizeof(mac_buf), " %02x:%02x:%02x:%02x:%02x:%02x",  str_mac[0], str_mac[1], str_mac[2], str_mac[3], str_mac[4], str_mac[5]); 
+                printf("DST: %s\n", mac_buf);
+                memset(mac_buf, 0 , sizeof(mac_buf)); 
+                break;
+            default:
+                break;
+            }
+            printf("type: %d : try int: %d try strin\n", attr->rta_type, RTA_DATA(attr));
+            attr = RTA_NEXT(attr, len);
         }
-        printf("type: %d : try int: %d try strin\n", attr->rta_type, RTA_DATA(attr));
-        attr = RTA_NEXT(attr, len);
+        show_ndmsg(neigh);
+        hdr = NLMSG_NEXT(hdr, rcvd);
     }
-    show_ndmsg(neigh);
     struct nda_cacheinfo *cinfo;
     // cinfo = (struct nda_cacheinfo*) 
 }
@@ -207,7 +227,7 @@ int get_route(){
             perror("Error nlmsg_len\n");
         }
         // IFLA_ADDRESS gives the MAC address/
-        handle_neig(msg.msg_iov->iov_base);
+        handle_neig(msg.msg_iov->iov_base, rcv_len);
         struct nlmsghdr *curr_msg;
         curr_msg = (struct nlmsghdr*) msg.msg_iov->iov_base;
         struct ifinfomsg *iface;
