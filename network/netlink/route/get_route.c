@@ -8,8 +8,10 @@
 /*
 https://lwn.net/Articles/208755/
 https://lwn.net/Articles/137299/
+To print structs with the fields ind GDB set the pretty print on
+(gdb) set print pretty on
+(gdb) p *struct_ptr
 */
-
 #include "route_helpers.h"
 
 /* manage netlink level operations */
@@ -68,12 +70,17 @@ void rtnl_print_link(struct nlmsghdr *h){
     }
 }
 
+#define NDA_RTA(r) \
+	((struct rtattr *)(((char *)(r)) + NLMSG_ALIGN(sizeof(struct ndmsg))))
+
+
 // receive the buffer and try to get the neigh information
 void handle_neig(uint8_t* buff){
     // as input we get the raw buffer from recvmsg
     // The ndmsg is contained as an attribute (?)
     struct nlmsghdr* hdr;
-    struct rtattr neig_attr;
+    struct rtattr* neig_attrs[NDA_MAX+1];
+    struct rtattr *attr;
     struct ndmsg* neigh;
 
     hdr = (struct nlmsghdr*) buff;
@@ -81,6 +88,25 @@ void handle_neig(uint8_t* buff){
     // is it contained as an attr?
     // http://man7.org/linux/man-pages/man7/rtnetlink.7.html
     neigh = (struct ndmsg*) NLMSG_DATA(hdr);
+    int len = hdr->nlmsg_len;
+    len -= NLMSG_LENGTH(sizeof(*neigh));
+    attr = NDA_RTA(neigh);
+    len = hdr->nlmsg_len - NLMSG_LENGTH(sizeof(*neigh));
+    unsigned char* str_mac;
+    char mac_buf[30];
+    while(RTA_OK(attr, len)){
+        switch (attr->rta_type){
+        case NDA_LLADDR:
+            str_mac = (unsigned char*)RTA_DATA(attr);
+            snprintf(mac_buf, sizeof(mac_buf), " %02x:%02x:%02x:%02x:%02x:%02x",  str_mac[0], str_mac[1], str_mac[2], str_mac[3], str_mac[4], str_mac[5]); 
+            printf("MAAAAC: %s", mac_buf);
+            break;
+        default:
+            break;
+        }
+        printf("type: %d : try int: %d try strin\n", attr->rta_type, RTA_DATA(attr));
+        attr = RTA_NEXT(attr, len);
+    }
     show_ndmsg(neigh);
     struct nda_cacheinfo *cinfo;
     // cinfo = (struct nda_cacheinfo*) 
@@ -130,8 +156,8 @@ int get_route(){
     nmsg = (struct nlmsghdr*)buf;
     nmsg->nlmsg_len = NLMSG_LENGTH(sizeof(*nmsg) + RTA_LENGTH(4/*IPV4_LEN*/));
     nmsg->nlmsg_flags = NLM_F_REQUEST|NLM_F_ROOT|NLM_F_ATOMIC|NLM_F_DUMP;
-    // nmsg->nlmsg_type = RTM_GETNEIGH; // 
-    nmsg->nlmsg_type = RTM_GETLINK;  // get interface settings
+    nmsg->nlmsg_type = RTM_GETNEIGH; // 
+    // nmsg->nlmsg_type = RTM_GETLINK;  // get interface settings
     // nmsg->nlmsg_type = RTM_GETNEIGHTBL; // to get all the table, see linux/neighbour.h not documented
     nmsg->nlmsg_seq = ++seq;
 
@@ -172,7 +198,8 @@ int get_route(){
             // verify that the message was sent by the kernel and not another app
             printf("Message from Kernel\n");
         }
-
+        printf("Received: %d\n", rcv_len);
+        printf("Received nlmsg_len %d\n", nmsg->nlmsg_len);
         if(nmsg->nlmsg_len < (int) sizeof(*nmsg) || nmsg->nlmsg_len > rcv_len || nmsg->nlmsg_seq != seq){
             perror("Error recvmsg\n");
         }
@@ -190,7 +217,7 @@ int get_route(){
             rtnl_print_link(curr_msg);
             int attr_len = curr_msg->nlmsg_len - NLMSG_LENGTH(sizeof(*iface));
             for(attr = IFLA_RTA(iface); RTA_OK(attr, attr_len); attr = RTA_NEXT(attr, attr_len)){
-                printf("rta_type: %d \t attr_len: %d rta_data: %s\n", attr->rta_type,attr_len, (char*)RTA_DATA(attr));
+                //printf("rta_type: %d \t attr_len: %d rta_data: %s\n", attr->rta_type,attr_len, (char*)RTA_DATA(attr));
             }
             if(NLMSG_DONE == curr_msg->nlmsg_type){
 
@@ -258,7 +285,44 @@ int get_route(){
     return 0;
 }
 
+int rntl_neigh(int fd){
+    struct {
+        struct nlmsghdr nlh;
+        struct ndmsg ndm;
+        char buf[512];
+    } req = {
+        .nlh.nlmsg_len  = NLMSG_LENGTH(sizeof(struct ndmsg)),
+        .nlh.nlmsg_type = RTM_GETNEIGH,
+        .nlh.nlmsg_flags= NLM_F_DUMP | NLM_F_REQUEST,
+        .nlh.nlmsg_seq  = 0,
+        .ndm.ndm_family = AF_NETLINK
+
+    };
+
+    struct sockaddr_nl nladdr;
+    struct iovec iov;
+    struct msghdr msg = {
+        .msg_name = &nladdr,
+        .msg_namelen = sizeof(nladdr),
+        .msg_iov = &iov,
+        .msg_iovlen = 1,
+    };
+    char* buffer;
+    int len = send(fd, &req, sizeof(req), 0);
+
+    if(len < 0){
+        perror("send msg:");
+    }
+
+}
+
 int main(int argc, char** argv) {
     get_route();
     return 0;
+    // int sock;
+    // create_nlsocket_route(&sock);
+    // printf("Socket number %d\n", sock);
+    // int no_bytes = rntl_neigh(sock);
+    // printf("Got %d bytes\n", no_bytes);
+    // return 0;
 }

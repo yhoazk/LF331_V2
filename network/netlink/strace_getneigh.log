@@ -1,0 +1,117 @@
+recvmsg(3, 
+
+{
+    msg_name={
+        sa_family=AF_NETLINK,
+        nl_pid=0,
+        nl_groups=00000000
+    },
+    msg_namelen=12,
+    msg_iov=[
+        {
+            iov_base=[
+                {
+                    {
+                        len=76,
+                        type=RTM_NEWNEIGH,
+                        flags=NLM_F_MULTI,
+                        seq=1,
+                        pid=21903
+                    },
+                    {
+                        ndm_family=AF_INET,
+                        ndm_ifindex=if_nametoindex("wlp5s0"),
+                        ndm_state=NUD_NOARP,
+                        ndm_flags=0,
+                        ndm_type=RTN_MULTICAST
+                    }, [
+                        {{nla_len=8, nla_type=NDA_DST}, inet_addr("224.0.0.251")},
+                        {{nla_len=10, nla_type=NDA_LLADDR}, inet_addr("1.0.94.0")},
+                        {{nla_len=8, nla_type=NDA_PROBES}, 0},
+                        {{nla_len=20, nla_type=NDA_CACHEINFO}, {ndm_confirmed=2054487, ndm_used=2048487, ndm_updated=2048487, ndm_refcnt=0}}
+                        ]
+                }, 
+                {
+                    {
+                        len=76,
+                        type=RTM_NEWNEIGH,
+                        flags=NLM_F_MULTI,
+                        seq=1,
+                        pid=21903
+                    }, 
+                    {
+                        ndm_family=AF_INET,
+                        ndm_ifindex=if_nametoindex("wlp5s0"),
+                        ndm_state=NUD_NOARP,
+                        ndm_flags=0,
+                        ndm_type=RTN_MULTICAST
+                    }, [
+                        {{nla_len=8, nla_type=NDA_DST}, inet_addr("224.0.0.22")},
+                        {{nla_len=10, nla_type=NDA_LLADDR}, inet_addr("1.0.94.0")},
+                        {{nla_len=8, nla_type=NDA_PROBES}, 0},
+                        {{nla_len=20, nla_type=NDA_CACHEINFO}, {ndm_confirmed=2054490, ndm_used=2048490, ndm_updated=2048490, ndm_refcnt=0}}
+                        ]
+                },
+                {
+                    {
+                        len=76,
+                        type=RTM_NEWNEIGH,
+                        flags=NLM_F_MULTI,
+                        seq=1,
+                        pid=21903
+                    }, 
+                    {
+                        ndm_family=AF_INET,
+                        ndm_ifindex=if_nametoindex("lo"), 
+                        ndm_state=NUD_NOARP, 
+                        ndm_flags=0, 
+                        ndm_type=RTN_BROADCAST
+                    }, [
+                        {{nla_len=8, nla_type=NDA_DST}, inet_addr("0.0.0.0")},
+                        {{nla_len=10, nla_type=NDA_LLADDR}, inet_addr("0.0.0.0")},
+                        {{nla_len=8, nla_type=NDA_PROBES}, 0},
+                        {{nla_len=20, nla_type=NDA_CACHEINFO}, {ndm_confirmed=1845495, ndm_used=1839495, ndm_updated=1839495, ndm_refcnt=0}}
+                        ]
+                },
+                {
+                    {
+                        len=76,
+                        type=RTM_NEWNEIGH, 
+                        flags=NLM_F_MULTI, 
+                        seq=1, 
+                        pid=21903
+                    }, 
+                    {
+                        ndm_family=AF_INET, 
+                        ndm_ifindex=if_nametoindex("virbr0"), 
+                        ndm_state=NUD_NOARP, 
+                        ndm_flags=0, 
+                        ndm_type=RTN_MULTICAST
+                    }, [
+                        {{nla_len=8, nla_type=NDA_DST}, inet_addr("224.0.0.251")},
+                        {{nla_len=10, nla_type=NDA_LLADDR}, inet_addr("1.0.94.0")},
+                        {{nla_len=8, nla_type=NDA_PROBES}, 0},
+                        {{nla_len=20, nla_type=NDA_CACHEINFO}, {ndm_confirmed=2063645, ndm_used=2057645, ndm_updated=2057645, ndm_refcnt=0}}
+                        ]
+                },
+                {
+                    {
+                        len=76, 
+                        type=RTM_NEWNEIGH, 
+                        flags=NLM_F_MULTI, 
+                        seq=1, 
+                        pid=21903
+                    }, 
+                    {
+                        ndm_family=AF_INET, 
+                        ndm_ifindex=if_nametoindex("wlp5s0"), 
+                        ndm_state=NUD_REACHABLE, 
+                        ndm_flags=0, 
+                        ndm_type=RTN_UNICAST
+                    }, [
+                        {{nla_len=8, nla_type=NDA_DST}, inet_addr("192.168.0.1")},
+                        {{nla_len=10, nla_type=NDA_LLADDR}, inet_addr("56.67.125.96")},
+                        {{nla_len=8, nla_type=NDA_PROBES}, 1},
+                        {{nla_len=20, nla_type=NDA_CACHEINFO}, {ndm_confirmed=974, ndm_used=130977, ndm_updated=130744, ndm_refcnt=1}}
+                        ]
+                }], iov_len=8192}], msg_iovlen=1, msg_controllen=0, msg_flags=0}, 0)

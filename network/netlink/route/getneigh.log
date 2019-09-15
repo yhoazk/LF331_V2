@@ -1,0 +1,98 @@
+recvmsg(3, {msg_name={sa_family=AF_NETLINK, nl_pid=0, nl_groups=00000000}, msg_namelen=12, 
+
+AF_INET = PF_INET = 2
+NUD_NOARP = 0x40 = 64
+RTN_MULTICAST = 5
+
+msg_iov=[
+    {
+        iov_base=[
+        {
+            {len=76, type=RTM_NEWNEIGH, flags=NLM_F_MULTI, seq=1, pid=15665}, // nlmsghdr
+            {ndm_family=AF_INET, ndm_ifindex=if_nametoindex("wlp5s0"), ndm_state=NUD_NOARP, ndm_flags=0, ndm_type=RTN_MULTICAST}, //ndmsg
+            [ // array of rtattr
+                {{nla_len=8, nla_type=NDA_DST}, inet_addr("224.0.0.251")},
+                {{nla_len=10, nla_type=NDA_LLADDR}, inet_addr("1.0.94.0")},
+                {{nla_len=8, nla_type=NDA_PROBES}, 0},
+                {{nla_len=20, nla_type=NDA_CACHEINFO},
+                    {   
+                        ndm_confirmed=4143521, 
+                        ndm_used=4137521, 
+                        ndm_updated=4137521, 
+                        ndm_refcnt=0
+                    }
+                }
+            ]
+        }, 
+        {
+            {len=76, type=RTM_NEWNEIGH, flags=NLM_F_MULTI, seq=1, pid=15665}, // nlmsg
+            {ndm_family=AF_INET, ndm_ifindex=if_nametoindex("wlp5s0"), ndm_state=NUD_NOARP, ndm_flags=0, ndm_type=RTN_MULTICAST},
+            [
+                {{nla_len=8, nla_type=NDA_DST}, inet_addr("224.0.0.22")},
+                {{nla_len=10, nla_type=NDA_LLADDR}, inet_addr("1.0.94.0")},
+                {{nla_len=8, nla_type=NDA_PROBES}, 0},
+                {{nla_len=20, nla_type=NDA_CACHEINFO}, 
+                    {
+                        ndm_confirmed=4143525, 
+                        ndm_used=4137525, 
+                        ndm_updated=4137525, 
+                        ndm_refcnt=0
+                    }
+                }
+            ]
+        }, 
+        {
+            {len=76, type=RTM_NEWNEIGH, flags=NLM_F_MULTI, seq=1, pid=15665},
+            {ndm_family=AF_INET, ndm_ifindex=if_nametoindex("lo"), ndm_state=NUD_NOARP, ndm_flags=0, ndm_type=RTN_BROADCAST},
+            [
+                {{nla_len=8, nla_type=NDA_DST}, inet_addr("0.0.0.0")},
+                {{nla_len=10, nla_type=NDA_LLADDR}, inet_addr("0.0.0.0")},
+                {{nla_len=8, nla_type=NDA_PROBES}, 0}, 
+                {{nla_len=20, nla_type=NDA_CACHEINFO}, 
+                    {
+                        ndm_confirmed=3934530, 
+                        ndm_used=3928530, 
+                        ndm_updated=3928530, 
+                        ndm_refcnt=0
+                    }
+                }
+            ]
+        }, 
+        {
+            {len=76, type=RTM_NEWNEIGH, flags=NLM_F_MULTI, seq=1, pid=15665},
+            {ndm_family=AF_INET, ndm_ifindex=if_nametoindex("virbr0"), ndm_state=NUD_NOARP, ndm_flags=0, ndm_type=RTN_MULTICAST},
+            [
+                {{nla_len=8, nla_type=NDA_DST}, inet_addr("224.0.0.251")},
+                {{nla_len=10, nla_type=NDA_LLADDR}, inet_addr("1.0.94.0")},
+                {{nla_len=8, nla_type=NDA_PROBES}, 0},
+                {{nla_len=20, nla_type=NDA_CACHEINFO},
+                    {   
+                        ndm_confirmed=4152679, 
+                        ndm_used=4146679, 
+                        ndm_updated=4146679, 
+                        ndm_refcnt=0
+                    }
+                }
+            ]
+        },
+        {
+            {len=76, type=RTM_NEWNEIGH, flags=NLM_F_MULTI, seq=1, pid=15665},
+            {ndm_family=AF_INET, ndm_ifindex=if_nametoindex("wlp5s0"), ndm_state=NUD_REACHABLE, ndm_flags=0, ndm_type=RTN_UNICAST},
+            [
+                {{nla_len=8, nla_type=NDA_DST}, inet_addr("192.168.0.1")},
+                {{nla_len=10, nla_type=NDA_LLADDR}, inet_addr("56.67.125.96")},
+                {{nla_len=8, nla_type=NDA_PROBES}, 1},
+                {{nla_len=20, nla_type=NDA_CACHEINFO}, 
+                    {
+                            ndm_confirmed=1525, 
+                            ndm_used=4576, 
+                            ndm_updated=4048,
+                            ndm_refcnt=1
+                    }
+                }
+            ]
+        }
+    ], 
+    iov_len=8192}
+], msg_iovlen=1, msg_controllen=0, msg_flags=0}, 0) = 380
+fstat(1, {st_mode=S_IFCHR|0620, st_rdev=makedev(0x88, 0), ...}) = 
