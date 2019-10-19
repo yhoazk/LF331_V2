@@ -185,7 +185,7 @@ int get_route(){
     rmsg->rtm_family = AF_INET;
     rmsg->rtm_dst_len = 0; // if 0 is specified we indicate that we want all the entries in the table
     rmsg->rtm_src_len = 0; // if 0 is specified we indicate that we want all the entries in the table
-    
+
     rta = RTM_RTA(rmsg);
     rta->rta_type = RTA_DST;
     rta->rta_len = RTA_LENGTH(4); // 4 = IPV4 addr len
@@ -207,7 +207,7 @@ int get_route(){
     msg.msg_iovlen = 1;
 
     if(sendmsg(sfd, &msg, 0) < 0)  perror("Err\n");
-
+    //reuse the same structure to receive the response
     iov.iov_base = buf;
     iov.iov_len = sizeof(buf);
     // Which structure is returned with the recvmsg call?

@@ -3,7 +3,7 @@
 [.](http://www.yolinux.com/TUTORIALS/LibraryArchives-StaticAndDynamic.html)
 
 Libraries employ a software design also known as "shared components" or "archive
-libraries", which groups together multiple compiled objets already compiled in a
+libraries", which groups together multiple objets already compiled in a
 single file which are known as libraries.
 
 The benefits of using libraries include:
