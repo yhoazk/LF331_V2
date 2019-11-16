@@ -11,3 +11,4 @@ namespace solib {
 }
 
 #endif // __IS_PALINDROME__
+// -U_FORTIFY_SOURCE -fstack-protector -Wall -Wunused-but-set-parameter -Wno-free-nonheap-object -fno-omit-frame-pointer '-std=c++0x' -MD -MF
