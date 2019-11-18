@@ -11,9 +11,12 @@ int main(int argc, char** argv){
     char buf[100];
     int fd, rc;
 
-    if((fd = socket(AF_UNIX, SOCK_STREAM, 0) == -1)){
+    //if((fd = socket(AF_UNIX, SOCK_STREAM, 0) == -1)){ <<- this version does not assign the value to fd
+    if( (fd = socket(AF_UNIX, SOCK_STREAM, 0)) == -1){
         perror("Socket error:");
         exit(-1);
+    } else {
+        printf("FD: %d\n", fd);
     }
 
     memset(&client_addr, 0, sizeof(client_addr));

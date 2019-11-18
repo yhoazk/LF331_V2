@@ -15,7 +15,12 @@ int main(int argc, char** argv){
     memset(&server_addr, 0, sizeof(server_addr));
     server_addr.sun_family = AF_UNIX;
     strncpy(server_addr.sun_path, "/tmp/mysock", sizeof(server_addr.sun_path)-1);
-    bind(fd, (struct sockaddr*)&server_addr, sizeof(server_addr));
+    unlink("/tmp/mysock");
+    if(-1 == bind(fd, (struct sockaddr*)&server_addr, sizeof(server_addr))){
+        perror("Bind");
+        close(fd);
+        exit(-1);
+    }
     char buf[100];
     if(listen(fd, 5) == -1){
         perror("Listen:");
