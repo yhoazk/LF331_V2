@@ -19,11 +19,11 @@ is to use the `ss` command.
 
 ## For the server
 ```
-ss -plax | grep server.exe | awk '{print $6}'
+ss -plax | grep server.exe | tr -s ' ' | awk '{print $6}'
 ```
 
 ## For the client
 
 ```
-ss -plax | grep client.exe | awk '{print $8}'
+ss -plax | grep client.exe | tr -s ' ' | awk '{print $8}'
 ```
