@@ -13,7 +13,7 @@ To print structs with the fields ind GDB set the pretty print on
 (gdb) set print pretty on
 (gdb) p *struct_ptr
 */
-#include "route_helpers.h"
+//#include "route_helpers.h"
 
 /* manage netlink level operations */
 
@@ -74,6 +74,9 @@ void rtnl_print_link(struct nlmsghdr *h){
 #define NDA_RTA(r) \
 	((struct rtattr *)(((char *)(r)) + NLMSG_ALIGN(sizeof(struct ndmsg))))
 
+void link(uint8_t* buff, int rcvd){
+    
+}
 
 // receive the buffer and try to get the neigh information
 void handle_neig(uint8_t* buff, int rcvd){
@@ -125,7 +128,7 @@ void handle_neig(uint8_t* buff, int rcvd){
             printf("type: %d : try int: %d try strin\n", attr->rta_type, RTA_DATA(attr));
             attr = RTA_NEXT(attr, len);
         }
-        show_ndmsg(neigh);
+//        show_ndmsg(neigh);
         hdr = NLMSG_NEXT(hdr, rcvd);
     }
     struct nda_cacheinfo *cinfo;
@@ -240,7 +243,7 @@ int get_route(){
                 //printf("rta_type: %d \t attr_len: %d rta_data: %s\n", attr->rta_type,attr_len, (char*)RTA_DATA(attr));
             }
             if(NLMSG_DONE == curr_msg->nlmsg_type){
-
+                return 0;
             } else{
 
             }
