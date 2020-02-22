@@ -68,6 +68,7 @@ filter:
 
 class netman final{
 private:
+    static bool connected;
     int nlsock_fd; /* netlink socket */
     struct sockaddr_nl sock;
     struct iovec iov;
@@ -77,6 +78,7 @@ public:
         // connect
         memset(&sock, 0, sizeof(sock));
         nlsock_fd = socket(AF_NETLINK, SOCK_RAW | SOCK_CLOEXEC, NETLINK_ROUTE);
+        // this should be connected only one... use singleton? 
     }
     void create(ioperand& op) ;
     void read(ioperand& op);
