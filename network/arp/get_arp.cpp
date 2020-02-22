@@ -23,6 +23,8 @@
 using namespace std;
 using ip_t = std::array<uint8_t, 4>;
 using mac_t = std::array<uint8_t, 6>;
+using arp_entry = std::pair<ip_t,mac_t>;
+using arp_table_t = map<std::array<uint8_t, 16>, vector<arp_entry>>;
 
 
 bool process_arp_entry(string& line, ip_t& ip, mac_t& mac, array<uint8_t, 16>& ifname){
@@ -60,6 +62,7 @@ bool process_arp_entry(string& line, ip_t& ip, mac_t& mac, array<uint8_t, 16>& i
 
 void fetch_arp(){
   ifstream arp_table("/proc/net/arp");
+  arp_table_t arpt;
   string line;
   ip_t ip;
   mac_t mac;
@@ -69,7 +72,9 @@ void fetch_arp(){
       cout << line << '\n';
       process_arp_entry(line, ip, mac, iface_name);
       cout << "name: " << iface_name.data() << "ip " << std::hex << ip.data() << '\n';
+      arpt[iface_name].push_back(std::make_pair(ip, mac));
     }
+    cout << "Size of table: " << arpt.size() << '\n';
 
 }
 
