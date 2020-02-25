@@ -27,36 +27,41 @@ using arp_entry = std::pair<ip_t,mac_t>;
 using arp_table_t = map<std::array<uint8_t, 16>, vector<arp_entry>>;
 
 
-bool process_arp_entry(string& line, ip_t& ip, mac_t& mac, array<uint8_t, 16>& ifname){
+void process_arp_entry(string& line, ip_t& ip, mac_t& mac, array<uint8_t, 16>& ifname){
+
+  /* Clear the dst arrays */
+  ip.fill(0);
+  mac.fill(0);
+  ifname.fill(0);
+
   string tok;
-  stringstream l{line};
+  stringstream ss{line};
   vector<string> arp_tokens;
-  while(getline(l, tok, ' ')){
-    if(tok.length() > 1){
-        cout << "x: " << tok << '\n';
+
+  while(getline(ss, tok, ' ')){
+    // the arp mask is normally '*'. But if is not, we should ignore it and that's why
+    // we include it in the tokens, if we remove the = from the comparison the name
+    // will be in position 4 in the vector of tokens
+    if(tok.length() >= 1){
         arp_tokens.push_back(tok);
     }
   }
 
   stringstream ip_str{arp_tokens[0]};
-  cout << "ip str" << arp_tokens[0].c_str() << '\n';
-  auto ip_it = std::begin(ip);
+  auto ip_it = begin(ip);
   while(getline(ip_str, tok, '.')){
-    cout << tok << ',' << '\n';
-    *ip_it++ = static_cast<uint8_t>(std::stoi(tok));
+    *ip_it++ = static_cast<uint8_t>(stoi(tok));
   }
 
   stringstream mac_str{arp_tokens[3]};
-  cout << "mac str" << arp_tokens[3].c_str() << '\n';
-  auto mac_it = std::begin(mac);
+  auto mac_it = begin(mac);
   while(getline(mac_str, tok, ':')){
-    int x;
-    istringstream(tok) >> std::hex >> x;
-    cout << tok << '-' << x <<'\n';
-    *mac_it++ = x;
+    int _octet; // using this var to force the int version of the >> operand
+    istringstream(tok) >> hex >> _octet;
+    *mac_it++ = static_cast<uint8_t>(_octet);
   }
 
-  std::copy(std::begin(arp_tokens[4]), std::end(arp_tokens[4]), std::begin(ifname)); 
+  copy(begin(arp_tokens[5]), end(arp_tokens[5]), begin(ifname)); 
 
 }
 
@@ -67,20 +72,24 @@ void fetch_arp(){
   ip_t ip;
   mac_t mac;
   array<uint8_t, 16> iface_name;
-    getline(arp_table, line); // drop the header
-    while(getline(arp_table, line)){
-      cout << line << '\n';
-      process_arp_entry(line, ip, mac, iface_name);
-      cout << "name: " << iface_name.data() << "ip " << std::hex << ip.data() << '\n';
-      arpt[iface_name].push_back(std::make_pair(ip, mac));
-    }
-    cout << "Size of table: " << arpt.size() << '\n';
+  getline(arp_table, line); // drop the header
+  while(getline(arp_table, line)){
+    // cout << line << '\n';
+    process_arp_entry(line, ip, mac, iface_name);
+    cout << "name: " << iface_name.data() << '\n';
+    arpt[iface_name].push_back(std::make_pair(ip, mac));
+  }
+  cout << "Size of table: " << arpt.size() << '\n';
+  for (auto &&d : arpt) {
+    cout << "iface name: " << d.first.data() << "  Entries: " << d.second.size() << '\n';
+    // for (auto &&v : d.second) {
+    //   cout << "ip: "  << v.first.data() << '\n';
+    // }
 
+  }
 }
 
-
 int main(){
-  std::array<uint8_t, 16> name;
   fetch_arp();
   return 0;
 }
