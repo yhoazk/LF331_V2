@@ -1,0 +1,5 @@
+#ifndef LIBNET_NETCLASS
+#define LIBNET_NETCLASS
+
+
+#endif /* LIBNET_NETCLASS */
