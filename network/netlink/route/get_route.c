@@ -74,9 +74,9 @@ void rtnl_print_link(struct nlmsghdr *h){
 #define NDA_RTA(r) \
 	((struct rtattr *)(((char *)(r)) + NLMSG_ALIGN(sizeof(struct ndmsg))))
 
-void link(uint8_t* buff, int rcvd){
+//void link(uint8_t* buff, int rcvd){
     
-}
+//}
 
 // receive the buffer and try to get the neigh information
 void handle_neig(uint8_t* buff, int rcvd){
@@ -151,6 +151,160 @@ void create_nlsocket_any(int* fd, int proto){
 void create_nlsocket_route(int* fd){
     create_nlsocket_any(fd, NETLINK_ROUTE);
 }
+
+
+int get_link(){
+    struct nlmsghdr *nmsg;
+    struct rtmsg *rmsg;
+    struct rtattr *rta;
+    uint8_t buf[1024*8];
+    struct sockaddr_nl snl; // socket type specific to NETLINK, it should be casted to sockaddr
+    // iovec
+    struct iovec iov;       // iovec: 
+    struct msghdr msg;
+    static int seq;
+    int rcv_len;
+    int sfd; // socket file descriptor
+    int i;
+    // Could generic be used for ROUTE and GETLINK?
+    // sfd = socket(AF_NETLINK, SOCK_RAW, NETLINK_ROUTE);
+    create_nlsocket_route(&sfd);
+    // int sfd = socket(AF_NETLINK, SOCK_RAW|SOCK_CLOEXEC, NETLINK_GENERIC);
+    memset(&snl, 0, sizeof(snl)); // here the nl_pid is set to zero to indicate that the msg is for the kernel
+    snl.nl_family = AF_NETLINK;
+    if(bind(sfd, (struct sockaddr*) &snl, sizeof(snl)) < 0){
+        perror("Error bind");
+    }
+
+    memset(buf, 0 , sizeof(buf));
+    nmsg = (struct nlmsghdr*)buf;
+    nmsg->nlmsg_len = NLMSG_LENGTH(sizeof(*nmsg) + RTA_LENGTH(4/*IPV4_LEN*/));
+    nmsg->nlmsg_flags = NLM_F_REQUEST|NLM_F_ROOT|NLM_F_ATOMIC|NLM_F_DUMP;
+    nmsg->nlmsg_type = RTM_GETLINK;
+    // nmsg->nlmsg_type = RTM_GETNEIGHTBL; // to get all the table, see linux/neighbour.h not documented
+    nmsg->nlmsg_seq = ++seq;
+
+    rmsg = (struct rtmsg*) (nmsg+1);
+    rmsg->rtm_family = AF_INET;
+    rmsg->rtm_dst_len = 0; // if 0 is specified we indicate that we want all the entries in the table
+    rmsg->rtm_src_len = 0; // if 0 is specified we indicate that we want all the entries in the table
+
+    rta = RTM_RTA(rmsg);
+    rta->rta_type = RTA_DST;
+    rta->rta_len = RTA_LENGTH(4); // 4 = IPV4 addr len
+
+    memset(&snl, 0, sizeof(snl));
+    snl.nl_family = AF_NETLINK;
+    iov.iov_base = nmsg;
+    iov.iov_len = nmsg->nlmsg_len;
+
+    memset(&msg, 0, sizeof(msg));
+    msg.msg_name = &snl;
+    msg.msg_namelen = sizeof(snl);
+    msg.msg_iov = &iov;
+    msg.msg_iovlen = 1;
+
+    if(sendmsg(sfd, &msg, 0) < 0)  perror("Err\n");
+    //reuse the same structure to receive the response
+    iov.iov_base = buf;
+    iov.iov_len = sizeof(buf);
+    // Which structure is returned with the recvmsg call?
+    for(;;){
+        if((rcv_len = recvmsg(sfd, &msg, 0)) <= 0 ){
+            perror("Error recvmsg\n");
+        } else if( ((struct sockaddr_nl*)(&msg.msg_name))->nl_pid == 0){
+            // verify that the message was sent by the kernel and not another app
+            printf("Message from Kernel\n");
+        }
+        printf("Received: %d\n", rcv_len);
+        printf("Received nlmsg_len %d\n", nmsg->nlmsg_len);
+        if(nmsg->nlmsg_len < (int) sizeof(*nmsg) || nmsg->nlmsg_len > rcv_len || nmsg->nlmsg_seq != seq){
+            perror("Error recvmsg\n");
+        }
+        if(nmsg->nlmsg_len == NLMSG_ERROR){
+            perror("Error nlmsg_len\n");
+        }
+        // IFLA_ADDRESS gives the MAC address/
+        handle_neig(msg.msg_iov->iov_base, rcv_len);
+        struct nlmsghdr *curr_msg;
+        curr_msg = (struct nlmsghdr*) msg.msg_iov->iov_base;
+        struct ifinfomsg *iface;
+        while(NLMSG_OK(curr_msg, rcv_len)){
+            printf("XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX\n");
+            iface = NLMSG_DATA(curr_msg);
+            printf("if type: %d\n", iface->ifi_type);
+            struct rtattr* attr;
+            rtnl_print_link(curr_msg);
+            int attr_len = curr_msg->nlmsg_len - NLMSG_LENGTH(sizeof(*iface));
+            for(attr = IFLA_RTA(iface); RTA_OK(attr, attr_len); attr = RTA_NEXT(attr, attr_len)){
+                //printf("rta_type: %d \t attr_len: %d rta_data: %s\n", attr->rta_type,attr_len, (char*)RTA_DATA(attr));
+            }
+            if(NLMSG_DONE == curr_msg->nlmsg_type){
+                return 0;
+            } else{
+
+            }
+            curr_msg = NLMSG_NEXT(curr_msg, rcv_len);
+        }
+    }
+    //i -= NLMSG_LENGTH(sizeof(*nmsg));
+    i = IFA_PAYLOAD(nmsg);
+    int alen = 4; //address len
+    struct in_addr *inp;
+    char ipv4string[INET_ADDRSTRLEN];
+    struct ndmsg neig;
+    /*
+    Filter NUD_REACHEABLE & NUD_PERMANENT
+    */
+    while (RTA_OK(rta, i)) {
+        // How is the RTA_DATA formatted in each case?
+        switch (rta->rta_type)
+        {
+        case RTA_OIF: // output interface index
+            printf("RTA_OIF\t ");
+            break;
+        case RTA_DST: // route destination address
+            printf("RTA_DST\t ");
+            break;
+        case RTA_SRC: // route source address
+            printf("RTA_SRC\t ");
+            break;
+        case RTA_IIF: // Input interface index
+            printf("RTA_IIF\t ");
+            break;
+        case RTA_GATEWAY: // gateway of the route
+            printf("RTA_GATEWAY\t ");
+            memcpy(&ipv4string, RTA_DATA(rta), alen);
+            printf("GATEWAYY: %s\n", ipv4string);
+            break;
+        case RTA_CACHEINFO:
+            printf("RTA_CACHEINFO\t ");
+            break;
+        case RTA_PRIORITY:
+            printf("RTA_PRIORITY\t ");
+            break;
+        case RTA_METRICS:
+            printf("RTA_METRICS\t ");
+            break;
+        case RTA_PROTOINFO:
+            printf("RTA_PROTOINFO\t ");
+            break;
+        default:
+            break;
+        }
+        // if(rta->rta_type == RTA_GATEWAY){
+            inp = (struct in_addr *)RTA_DATA(rta);
+            inet_ntop(AF_INET, inp, ipv4string, INET_ADDRSTRLEN);
+            printf("rta_type: %d\n",rta->rta_type);
+            printf("addr: %s\n",ipv4string);
+        // }
+        printf("next\n");
+        rta = RTA_NEXT(rta, i);
+    }
+    close(sfd);
+    return 0;
+}
+
 
 int get_route(){
     struct nlmsghdr *nmsg;
@@ -340,7 +494,8 @@ int rntl_neigh(int fd){
 }
 
 int main(int argc, char** argv) {
-    get_route();
+    //get_route();
+    get_link();
     return 0;
     // int sock;
     // create_nlsocket_route(&sock);
