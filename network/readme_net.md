@@ -11,3 +11,10 @@ visible.
 
 
 
+### Sysfs net class
+
+
+The counters in `/sys/class/net/*/statistics` are not cleared when the
+interfaces go down, only removing the network drivers or a reboot will
+restart the counters.
+
