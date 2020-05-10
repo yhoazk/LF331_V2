@@ -10,6 +10,7 @@ extern "C" {
     #include <linux/rtc.h>
     #include <sys/ioctl.h>
     #include <sys/time.h>
+    #include <time.h>
     #include <sys/types.h>
     #include <fcntl.h>
     #include <unistd.h>
@@ -46,6 +47,7 @@ int do_ioctl(const struct rtc_time* new_time) {
 }
 
 
+
 int main(int argc, char const *argv[])
 {
     using namespace std;
@@ -64,8 +66,29 @@ int main(int argc, char const *argv[])
     std::cout << "GMT: " << std::put_time(std::gmtime(&timt), "%c, %Z") << '\n';
 
     auto ttm = *std::gmtime(&timt);
-
+    // Set the HW clock
     do_ioctl(reinterpret_cast<struct rtc_time*>(&ttm));
+    // Set the system time
+    struct timeval tv;
+    struct timezone tz{0,0};
+    tv.tv_sec = chrono::duration_cast<chrono::seconds>(tomorrow.time_since_epoch()).count();
+    tv.tv_usec = chrono::duration_cast<chrono::microseconds>(tomorrow.time_since_epoch()).count();
+    std::cout << "Setting system to sec since epoc: " << tv.tv_sec << " micros: " << tv.tv_usec << '\n';
+    if(-1 ==settimeofday(&tv, &tz)) {
+        std::cerr << "Error: settimeofday\n";
+        //exit(errno);
+    }
+
+    struct timespec ts_tv;
+    ts_tv.tv_sec = tv.tv_sec;
+    // apparently it does not work with nsec set
+    ts_tv.tv_nsec = 0; 
+    //chrono::duration_cast<chrono::nanoseconds>(tomorrow.time_since_epoch()).count();
+    if (-1 == clock_settime(CLOCK_REALTIME, &ts_tv)) {
+        std::cerr << __func__ << " Error: " << to_string(errno);
+        exit(errno);
+    }
+
 
     return 0;
 }
