@@ -21,14 +21,24 @@ extern "C" {
 // Set sysclock to any date
 // sync HW and sys clock
 
-int do_ioctl(const struct rtc_time* new_time) {
-    int fd = open("/dev/rtc0", O_RDONLY);
-    if (fd == -1) {
-        perror("rt0: ");
-        exit(errno);
-    }
+namespace linux_wrapper {
+namespace time {
 
-    if (-1 == ioctl(fd, RTC_SET_TIME, new_time)) {
+int do_ioctl(const size_t rtc_no) {
+    std::string path{"/dev/rtc"};
+    path += std::to_string(rtc_no);
+    int fd = open(path.c_str(), O_RDONLY);
+    if (fd == -1) {
+        auto err = errno;
+        perror("rt0: ");
+        close(fd);
+        return err;
+    }
+    auto now = std::chrono::system_clock::now();
+    time_t timt = std::chrono::system_clock::to_time_t(now);
+    auto ttm = *std::gmtime(&timt);
+
+    if (-1 == ioctl(fd, RTC_SET_TIME, ttm)) {
         perror("RTC_SET_TIME ioctl: ");
         close(fd);
         exit(errno);
@@ -45,8 +55,8 @@ int do_ioctl(const struct rtc_time* new_time) {
 
     return 0;    
 }
-
-
+} // time
+} // linux
 
 int main(int argc, char const *argv[])
 {
@@ -67,18 +77,18 @@ int main(int argc, char const *argv[])
 
     auto ttm = *std::gmtime(&timt);
     // Set the HW clock
-    do_ioctl(reinterpret_cast<struct rtc_time*>(&ttm));
+    linux_wrapper::time::do_ioctl(0);
     // Set the system time
     struct timeval tv;
     struct timezone tz{0,0};
     tv.tv_sec = chrono::duration_cast<chrono::seconds>(tomorrow.time_since_epoch()).count();
     tv.tv_usec = chrono::duration_cast<chrono::microseconds>(tomorrow.time_since_epoch()).count();
     std::cout << "Setting system to sec since epoc: " << tv.tv_sec << " micros: " << tv.tv_usec << '\n';
-    if(-1 ==settimeofday(&tv, &tz)) {
+    if(-1 == settimeofday(&tv, &tz)) {
         std::cerr << "Error: settimeofday\n";
         //exit(errno);
     }
-
+    //https://embeddedartistry.com/blog/2019/01/31/converting-between-timespec-stdchrono/
     struct timespec ts_tv;
     ts_tv.tv_sec = tv.tv_sec;
     // apparently it does not work with nsec set
@@ -88,7 +98,6 @@ int main(int argc, char const *argv[])
         std::cerr << __func__ << " Error: " << to_string(errno);
         exit(errno);
     }
-
 
     return 0;
 }
