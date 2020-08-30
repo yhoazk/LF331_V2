@@ -93,7 +93,9 @@ bool set(){
 }
 
 bool ping_send() {
-    auto xd = sendto(sfd, &icmp_buff[0], 64-8, 0, reinterpret_cast<struct sockaddr*>(to), sizeof(to));
+    // the error was sizeof(to) which is a pointer
+    auto xd = sendto(sfd, &icmp_buff[0], 64-8, 0,
+                     reinterpret_cast<const struct sockaddr*>(to), sizeof(struct sockaddr));
     std::cerr << "MSG sent: " << std::to_string(xd) << '\n';
     nping++;
     return xd > 0;
