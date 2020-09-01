@@ -82,9 +82,9 @@ bool send_arp(const std::string& iface, const arp_entry& src, const arp_entry& d
     return false;
   }
   llsock.sll_halen = ip_size;
-  std::fill(begin(llsock.sll_addr), begin(llsock.sll_addr) + mac_size, 0x33);
+  std::fill(begin(llsock.sll_addr), begin(llsock.sll_addr) + mac_size, 0xff);
 
-  int skt = socket(AF_PACKET, SOCK_RAW, htons(ETH_P_ALL));
+  int skt = socket(AF_PACKET, SOCK_RAW, htons(ETH_P_ARP));
   if(skt < 0) {
     perror("socket");
     return false;
@@ -130,6 +130,50 @@ bool send_arp(const std::string& iface, const arp_entry& src, const arp_entry& d
   unsigned int socklen{sizeof(llsock)};
   int result = sendto(sock_fd.get(), arp_pkt.data(), arp_it - arp_it_begin, 0, (const sockaddr*)(&llsock), socklen);
   // wait for ans
+
+
+  //
+  arp_it = std::begin(arp_pkt);
+  arp_it_begin = std::begin(arp_pkt);
+
+  arp_it = copy_to_buffer(ethh, arp_it);
+  arp_it = copy_to_buffer(arph, arp_it);
+  // copy sender
+  arp_it = copy_to_buffer(src.second, arp_it);
+  arp_it = copy_to_buffer(src.first, arp_it);
+  // copy tgr
+  arp_it = copy_to_buffer(dst.second, arp_it);
+  arp_it = copy_to_buffer(dst.first, arp_it);
+  sockaddr_ll rcvsock_ll{0};
+  rcvsock_ll.sll_family = AF_PACKET;
+  rcvsock_ll.sll_ifindex = idx;
+  rcvsock_ll.sll_protocol = htons(ETH_P_ARP);
+
+  struct timeval timeout{.tv_sec=1, .tv_usec = 0};
+  if (setsockopt(sock_fd.get(), SOL_SOCKET, SO_RCVTIMEO, &timeout, sizeof(timeout)) < 0) {
+    perror("setsockopt");
+    return 0;
+  }
+
+  do {
+    std::cout << "rcv\n";
+    std::fill(begin(arp_pkt), end(arp_pkt), 0x00);
+    result = recvfrom(sock_fd.get(), arp_pkt.data(), arp_it - arp_it_begin, 0, (struct sockaddr*)(&rcvsock_ll), (socklen_t*) &socklen);
+    if(result > 0) {
+      int k{1};
+      std::cout << "Result: " << std::to_string(result) << '\n';
+      for(auto& c : arp_pkt) {
+        std::cout << std::hex << static_cast<int>(c) << ' ';
+        if(k < result and ((k++ % 16) == 0)) {
+          std::cout << '\n';
+        }
+        if(k == result) {
+          break;
+        }
+      }
+    }
+    std::cout << '\n';
+  } while (result > 0);
 }
 
 void process_arp_entry(string& line, ip_t& ip, mac_t& mac, array<uint8_t, 16>& ifname){
@@ -197,7 +241,7 @@ void fetch_arp(){
 int main(){
   // fetch_arp();
 
-  arp_entry src{{0, 0, 0, 0}, {0x0a, 0xC0, 0x02, 0xAA, 0xBB, 0xCC}};
+  arp_entry src{{0, 0, 0, 0}, {0xaa, 0x18, 0x22, 0x1c, 0x22, 0x22}};
   arp_entry dst{{192, 168, 0, 1}, {0xff, 0xff, 0xff, 0xff, 0xff, 0xff}};
 
   send_arp("wlp8s0", src, dst);
