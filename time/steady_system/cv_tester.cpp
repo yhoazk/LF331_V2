@@ -4,20 +4,29 @@
 #include <mutex>
 #include <thread>
 
+#ifdef BOOST_TEST
+#include "boost/thread.hpp"
+#endif
+
 int main()
 {
-    std::mutex m;
-    std::condition_variable cv;
+#ifdef BOOST_TEST
+    using namespace boost;
+#else
+    using namespace std;
+#endif
+    mutex m;
+    condition_variable cv;
 
-    std::unique_lock<std::mutex> lock(m);
+    unique_lock<mutex> lock(m);
 
-    auto const start = std::chrono::steady_clock::now();
-    auto const result = cv.wait_for(lock, std::chrono::seconds(2));
-    auto const finish = std::chrono::steady_clock::now();
+    auto const start = chrono::steady_clock::now();
+    auto const result = cv.wait_for(lock, chrono::seconds(2));
+    auto const finish = chrono::steady_clock::now();
 
-    auto const elapsed_ms = std::chrono::duration_cast<std::chrono::milliseconds>(finish - start);
+    auto const elapsed_ms = chrono::duration_cast<chrono::milliseconds>(finish - start);
 
-    if (result == std::cv_status::timeout)
+    if (result == cv_status::timeout)
         std::cout << "Timeout after " << elapsed_ms.count() << "ms\n";
     else
         std::cout << "Awoken after " << elapsed_ms.count() << "ms\n";

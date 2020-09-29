@@ -101,7 +101,7 @@ streched as necessary, so in theory they do not have the same length.
 glibc provides to types of clocks, steady and system
 
 
-
+install g++ fedora: dnf install gcc-c++
 - - -
 
 1 [UTC](Coordinated Universal Time)

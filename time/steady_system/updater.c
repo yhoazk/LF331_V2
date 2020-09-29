@@ -6,7 +6,7 @@ int main(int argc, char *argv[])
 {
     struct timespec ts;
     clock_gettime(CLOCK_REALTIME, &ts);
-   size_t count=20;
+   size_t count=20000;
 
     while (--count)
     {
