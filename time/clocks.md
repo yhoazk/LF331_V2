@@ -96,8 +96,12 @@ to keep UTC and GMT to difting apart. By contrast, in GMT the seconds are
 streched as necessary, so in theory they do not have the same length.
 
 
+## System clock and Steady clock
+
+glibc provides to types of clocks, steady and system
 
 
+install g++ fedora: dnf install gcc-c++
 - - -
 
 1 [UTC](Coordinated Universal Time)
