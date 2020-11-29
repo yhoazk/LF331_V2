@@ -20,10 +20,11 @@ extern "C" {
 #include <netdb.h>
 }
 
-const size_t tgt_port{8181};
+const size_t tgt_port{8080};
 
 
 int main () {
+    using namespace network::timestamp::tx_ts;
     network::timestamp::hw_config hw_cfg("enp9s0");
     auto opt_config = hw_cfg.read_config();
     int udp_sock_fd{-1};
@@ -45,7 +46,9 @@ int main () {
 
     servaddr.sin_family = AF_INET;
     //servaddr.sin_addr.s_addr = INADDR_ANY;
-    servaddr.sin_addr.s_addr = inet_addr("192.168.0.129");
+    // needs su
+    //servaddr.sin_addr.s_addr = inet_addr("192.168.0.129");
+    servaddr.sin_addr.s_addr = inet_addr("127.0.0.1");
     servaddr.sin_port = htons(tgt_port);
 
     //int bind_err = bind(udp_sock_fd, reinterpret_cast<const struct sockaddr*>(&servaddr), sizeof(servaddr));
@@ -67,17 +70,27 @@ int main () {
         // here it continues with SW timestamps
         // is there any difference if the timestamp is set before or after bind
         // is there any difference if the timestamp is set before or after bind??
-        using namespace network::timestamp::tx_ts;
+        int ok = enable_sw_txts(udp_sock_fd);
+        if(ok < 0) {
+            std::cerr << "Unable to set timestamp in socket\n";
+        } else {
+            std::cout << "Timestamps enabled in socket\n";
+        }
+
     }
     std::cout << "Sending udp pkt\n";
     unsigned int len = sizeof(cliaddr);
     int bytes_send = sendto(udp_sock_fd, reinterpret_cast<const char*>(msg),
                             strlen(msg), MSG_CONFIRM, 
                             reinterpret_cast<const struct sockaddr*>(NULL), sizeof(servaddr));
+
     if (bytes_send < 0 ) {
         perror("sendto");
     } else {
         std::cout << "Bytes send: " << std::to_string(bytes_send) << '\n';
+        // get timestamp of message
+        // auto ts = get_sw_txts(udp_sock_fd, );
     }
+    close(udp_sock_fd);
     return 0;
 }
