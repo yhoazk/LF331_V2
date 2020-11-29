@@ -56,4 +56,5 @@ dkms.conf
 
 bazel-*
 *.swp
-*~
+*.swo
+*o
