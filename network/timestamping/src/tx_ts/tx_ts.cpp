@@ -9,10 +9,17 @@ int enable_sw_txts(int socket_fd) {
     int flags = SOF_TIMESTAMPING_TX_SOFTWARE;
     int err = setsockopt(socket_fd, SOL_SOCKET, SO_TIMESTAMPING, &flags, sizeof(flags));
     if (err < 0) {
-        perror("setsockopt");
+        perror("setsockopt: SO_TIMESTAMPING");
         socket_fd = -1;
     } else {
-        std::cout << "SW ts enabled\n";
+        std::cout << "SW  timestampingenabled\n";
+    }
+    flags = 1;
+    err = setsockopt(socket_fd, SOL_SOCKET, SO_SELECT_ERR_QUEUE, &flags, sizeof(flags));
+    if (err < 0) {
+        perror("setsockopt:SELECT_ERR_QUEUE");
+    } else {
+        std::cout << "Err queue enabled in socket\n";
     }
     return socket_fd;
 }
@@ -22,7 +29,7 @@ int enable_hw_txts(int socket_fd) {
 }
 
 
-timespec get_sw_txts(int socket_fd, std::array<uint8_t, 1024>& buf) {
+timespec get_sw_txts(int socket_fd, std::array<uint8_t, 512>& buf) {
     char control [256];
     int level{0};
     int type{0};
@@ -37,7 +44,7 @@ timespec get_sw_txts(int socket_fd, std::array<uint8_t, 1024>& buf) {
     struct timespec *sw{nullptr};
     //struct hw_timestamp hwts;
 
-    bzero(&control, sizeof(control));
+    bzero(control, sizeof(control));
     bzero(&msg, sizeof(msg));
     // is addr needed?
 
@@ -55,18 +62,25 @@ timespec get_sw_txts(int socket_fd, std::array<uint8_t, 1024>& buf) {
     } else if(!(pfd.revents & POLLPRI)) {
         perror("poll got error");
         return {0,0};
+    } else {
+        std::cout << "polling worked\n";
     }
 
     cnt = recvmsg(socket_fd, &msg, MSG_ERRQUEUE);
     if (cnt < 0 ) {
         perror("recvmsg:");
+    } else {
+        std::cout << "recieved: " << std::to_string(cnt) << '\n';
     }
 
     for (cm = CMSG_FIRSTHDR(&msg); cm != nullptr; cm=CMSG_NXTHDR(&msg,cm)) {
         level = cm->cmsg_level;
         type = cm->cmsg_type;
-
         if (SOL_SOCKET == level && SO_TIMESTAMPING == type) {
+
+            std::cout << "TIMESTAMPING\n";
+            std::cout <<  "SOF_TIMESTAMPING\n";
+
             if (cm->cmsg_len < sizeof(*ts)*3) {
                  std::cerr << "msg wrong length\n";
                  return {0,0};
@@ -76,13 +90,13 @@ timespec get_sw_txts(int socket_fd, std::array<uint8_t, 1024>& buf) {
                       << "sec " << ts[2].tv_nsec << "ns\n";
         }
         if (SOL_SOCKET == level && SO_TIMESTAMPNS == type) {
+            std::cout <<  "SOF_TIMESTAMPNS\n";
             if (cm->cmsg_len < sizeof(*sw)) {
                 std::cerr << "msg wrong len\n";
                 return {0,0};
             }
             sw = reinterpret_cast<struct timespec*>(CMSG_DATA(cm));
             //hwts->sw = timespec_to_tmv(*sw);
-
         }
     }
 }

@@ -28,12 +28,11 @@ int main () {
     network::timestamp::hw_config hw_cfg("enp9s0");
     auto opt_config = hw_cfg.read_config();
     int udp_sock_fd{-1};
-    std::array<uint8_t, 1024> msg_buf;
+    std::array<uint8_t, 512> msg_buf;
     msg_buf.fill(5);
-    msg_buf[1023] = '\0';
+    msg_buf[256] = '\0';
     struct sockaddr_in servaddr;
     struct sockaddr_in cliaddr;
-    const char* msg = "somemessage";
 
     udp_sock_fd = socket(AF_INET, SOCK_DGRAM, 0);
     if (udp_sock_fd < 0) {
@@ -80,8 +79,8 @@ int main () {
     }
     std::cout << "Sending udp pkt\n";
     unsigned int len = sizeof(cliaddr);
-    int bytes_send = sendto(udp_sock_fd, reinterpret_cast<const char*>(msg),
-                            strlen(msg), MSG_CONFIRM, 
+    int bytes_send = sendto(udp_sock_fd, reinterpret_cast<const char*>(msg_buf.data()),
+                            msg_buf.size(), MSG_CONFIRM, 
                             reinterpret_cast<const struct sockaddr*>(NULL), sizeof(servaddr));
 
     if (bytes_send < 0 ) {
@@ -89,7 +88,7 @@ int main () {
     } else {
         std::cout << "Bytes send: " << std::to_string(bytes_send) << '\n';
         // get timestamp of message
-        // auto ts = get_sw_txts(udp_sock_fd, );
+        auto ts = get_sw_txts(udp_sock_fd, msg_buf);
     }
     close(udp_sock_fd);
     return 0;

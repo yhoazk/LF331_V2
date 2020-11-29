@@ -21,8 +21,8 @@ namespace tx_ts {
 int enable_sw_txts(int socket_fd);
 int enable_hw_txts(int socket_fd);
 
-timespec get_sw_txts(int socket_fd, std::array<uint8_t, 1024>& msg);
-timespec get_hw_txts(int socket_fd, std::array<uint8_t, 1024>& msg);
+timespec get_sw_txts(int socket_fd, std::array<uint8_t, 512>& msg);
+timespec get_hw_txts(int socket_fd, std::array<uint8_t, 512>& msg);
 
 }  // namespace tx_ts
 }  // namespace timestamp
