@@ -47,3 +47,45 @@ improves level of thrust. The most usual issue is a misconfiguration of either I
 or 6 and while the transition is done there would be need to support both, then
 the need of transport IPv6 over IPv4, which will bring a new series of problems.
 
+
+### Promiscuos
+
+There are several levels of promiscuity in linux. Tools like `ip` and `ifconfig` do not detect promisc mode when is not explicitly requested, the driver decides when to enable promisc mode. For example, if the driver does not have enough granularity and we need to process PTP frames which go to a broadcast mac address, the driver changes to promisc mode.
+`tcpdump` for example enables the mode `1`, there `ip` does not report it by default.
+
+There are three levels in the promisc mode:
+
+`0`: promisc mode disabled
+`1`: promisc mode implicitly enabled
+`2`: promisc mode explicitly enabled
+
+In state `1` tools `ip` and `ifconfig` will not report it. Only `ip` will report it with the following options:
+[src](https://unix.stackexchange.com/questions/561102/what-determines-an-interfaces-promiscuity-the-interface-flags-or-properties)
+```
+ip -d l l eth0
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
