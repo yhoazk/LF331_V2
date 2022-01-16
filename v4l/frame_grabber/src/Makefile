@@ -4,9 +4,14 @@ all: clean comp
 
 clean:
 	rm -f ${APP}
-	rm -f ${APP}_cpp
+	rm -f ${APP}_cpp_src*
+	rm -f v4l2grab
 
 comp:
-	gcc -Wall -O3 -o ${APP} v4lgrabber.c -lv4l2
-	g++ -Wall -O3 -o ${APP}_cpp v4lgrabber.cpp -lv4l2
+	gcc -Wall -O3 -DVIDEO_SRC=\"/dev/video0\" -o ${APP} v4lgrabber.c -lv4l2
+	gcc -Wall -O3 -DVIDEO_SRC=\"/dev/video2\" -o ${APP} v4lgrabber.c -lv4l2
 
+	g++ -Wall -O3 -DVIDEO_SRC=\"/dev/video0\" -o ${APP}_cpp_src0 v4lgrabber.cpp -lv4l2
+	g++ -Wall -O3 -DVIDEO_SRC=\"/dev/video2\" -o ${APP}_cpp_src2 v4lgrabber.cpp -lv4l2
+
+	gcc v4l_jpeg_grab.c -o v4l2grab -Wall -ljpeg -DIO_READ -DIO_MMAP -DIO_USERPTR

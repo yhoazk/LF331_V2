@@ -25,6 +25,22 @@
 
 #define CLEAR(x) memset(&(x), 0, sizeof(x))
 
+#ifndef VIDEO_SRC
+#define VIDEO_SRC "/dev/video0"
+#endif // VIDEO_SRC
+
+#ifndef VIDEO_WIDTH
+#define VIDEO_WIDTH (640)
+#endif // VIDEO_WIDTH
+
+#ifndef VIDEO_HEIGHT
+#define VIDEO_HEIGHT (480)
+#endif // VIDEO_HEIGHT
+
+#ifndef VIDEO_FRAME_COUNT
+#define VIDEO_FRAME_COUNT (20)
+#endif // VIDEO_FRAME_COUNT
+
 struct buffer {
     void   *start;
     size_t length;
@@ -71,8 +87,8 @@ int main(int argc, char **argv) {
 
     CLEAR(fmt);
     fmt.type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
-    fmt.fmt.pix.width       = 640;
-    fmt.fmt.pix.height      = 480;
+    fmt.fmt.pix.width       = VIDEO_WIDTH;
+    fmt.fmt.pix.height      = VIDEO_HEIGHT;
     fmt.fmt.pix.pixelformat = V4L2_PIX_FMT_RGB24;
     fmt.fmt.pix.field       = V4L2_FIELD_INTERLACED;
     xioctl(fd, VIDIOC_S_FMT, &fmt);
@@ -81,7 +97,7 @@ int main(int argc, char **argv) {
         exit(EXIT_FAILURE);
     }
 
-    if ((fmt.fmt.pix.width != 640) || (fmt.fmt.pix.height != 480)) {
+    if ((fmt.fmt.pix.width != VIDEO_WIDTH) || (fmt.fmt.pix.height != VIDEO_HEIGHT)) {
         printf("Warning: driver is sending image at %dx%d\\n",
                 fmt.fmt.pix.width, fmt.fmt.pix.height);
     }
@@ -123,7 +139,7 @@ int main(int argc, char **argv) {
     type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
 
     xioctl(fd, VIDIOC_STREAMON, &type);
-    for (i = 0; i < 20; i++) {
+    for (i = 0; i < VIDEO_FRAME_COUNT; i++) {
         do {
             FD_ZERO(&fds);
             FD_SET(fd, &fds);
@@ -167,5 +183,4 @@ int main(int argc, char **argv) {
     v4l2_close(fd);
 
     return 0;
-
 }

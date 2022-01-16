@@ -31,7 +31,7 @@ struct buffer_t {
 };
 
 /**
- * Wrapper for v4l2 IOCTL calls which retries any interrumped call
+ * Wrapper for v4l2 IOCTL calls which retries any interrumped call.
  * If the ioctl call fails for other reason than an interrupted processing
  * it will terminate the program
  * */
@@ -70,10 +70,11 @@ int main(int argc, char **argv) {
 
     CLEAR(fmt);
     fmt.type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
-    fmt.fmt.pix.width       = 640;
-    fmt.fmt.pix.height      = 480;
+    fmt.fmt.pix.width       = 800;
+    fmt.fmt.pix.height      = 600;
     fmt.fmt.pix.pixelformat = V4L2_PIX_FMT_RGB24;
     fmt.fmt.pix.field       = V4L2_FIELD_INTERLACED;
+
     xioctl(fd, VIDIOC_S_FMT, &fmt);
     if (fmt.fmt.pix.pixelformat != V4L2_PIX_FMT_RGB24) {
         printf("Libv4l didn't accept RGB24 format. Can't proceed.\\n");
@@ -122,7 +123,7 @@ int main(int argc, char **argv) {
     type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
 
     xioctl(fd, VIDIOC_STREAMON, &type);
-    for (i = 0; i < 20; i++) {
+    for (i = 0; i < 10; i++) {
         do {
             FD_ZERO(&fds);
             FD_SET(fd, &fds);
