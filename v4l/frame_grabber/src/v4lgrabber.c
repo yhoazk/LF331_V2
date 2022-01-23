@@ -23,6 +23,8 @@
 #include <linux/videodev2.h>
 #include <libv4l2.h>
 
+#include <jpeglib.h>
+
 #define CLEAR(x) memset(&(x), 0, sizeof(x))
 
 #ifndef VIDEO_SRC

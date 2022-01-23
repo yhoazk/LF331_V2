@@ -102,7 +102,7 @@ static void YUV422toRGB888(int width, int height, unsigned char *src, unsigned c
   for (line = 0; line < height; ++line) {
     for (column = 0; column < width; ++column) {
       *tmp++ = CLIP((double)*py + 1.402*((double)*pv-128.0));
-      *tmp++ = CLIP((double)*py - 0.344*((double)*pu-128.0) - 0.714*((double)*pv-128.0));      
+      *tmp++ = CLIP((double)*py - 0.344*((double)*pu-128.0) - 0.714*((double)*pv-128.0));
       *tmp++ = CLIP((double)*py + 1.772*((double)*pu-128.0));
 
       // increase py every time
