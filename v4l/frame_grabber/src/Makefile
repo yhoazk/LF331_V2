@@ -15,5 +15,6 @@ comp:
 	g++ -Wall -O3 -DVIDEO_SRC=\"/dev/video0\" -o ${APP}_cpp_src0 v4lgrabber.cpp -lv4l2
 	g++ -Wall -O3 -DVIDEO_SRC=\"/dev/video2\" -o ${APP}_cpp_src2 v4lgrabber.cpp -lv4l2
 
-	gcc v4l_jpeg_grab.c -o v4l2grab -Wall -ljpeg -DIO_READ -DIO_MMAP -DIO_USERPTR
+	gcc v4l_jpeg_grab.c -o v4l2grab_jpg -Wall -ljpeg -DIO_READ -DIO_MMAP -DIO_USERPTR
 	g++ video.cpp -o video -lboost_filesystem -lopencv_core -lopencv_highgui -lopencv_videoio -lopencv_imgcodecs -Wall -I/usr/include/opencv4
+
