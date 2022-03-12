@@ -60,3 +60,11 @@ bazel-*
 
 # Output images from v4l
 *.ppm
+
+# Rust build results
+debug/
+target/
+
+Cargo.lock
+**/*.rs.bk
+
