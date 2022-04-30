@@ -1,0 +1,34 @@
+
+  http://redhat.com/~mingo/time-warp-test/MINI-HOWTO
+
+You can check TSC reliability on 32-bit and 64-bit x86 boxes via:
+
+  http://people.redhat.com/mingo/time-warp-test/time-warp-test.c
+
+On a 'good' system with perfectly in-sync TSCs you should get
+output like this:
+
+| aldebaran:~/tmp> ./time-warp-test
+| 16 CPUs, running 16 parallel test-tasks.
+| checking for time-warps via:
+| - read time stamp counter (RDTSC) instruction (cycle resolution)
+|
+|  TSC: 0.42us, fail:0 /
+
+On a 'bad' system with not-in-sync TSCs you should get output like:
+
+| europe:~/tmp> ./time-warp-test
+| 2 CPUs, running 2 parallel test-tasks.
+| checking for time-warps via:
+| - read time stamp counter (RDTSC) instruction (cycle resolution)
+|
+| new TSC-warp maximum:   -579271 cycles, 00000029861e916f -> 000000298615baa8
+| new TSC-warp maximum:   -579491 cycles, 00000029862960b5 -> 0000002986208912
+| new TSC-warp maximum:   -579502 cycles, 00000029865a74a4 -> 0000002986519cf6
+| new TSC-warp maximum:   -579557 cycles, 000000298731ae39 -> 000000298728d654
+| new TSC-warp maximum:   -579579 cycles, 000000299c72ff25 -> 000000299c6a272a
+| new TSC-warp maximum:   -579601 cycles, 00000029ef2e806d -> 00000029ef25a85c
+|  TSC: 0.38us, fail:25071 |
+
+You get the 'TSC-warp' messages, and the 'fail' count is non-zero.
+
